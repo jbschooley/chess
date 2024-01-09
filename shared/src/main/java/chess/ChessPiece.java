@@ -66,7 +66,7 @@ public class ChessPiece {
                 moves = bishopMoves(board, myPosition);
                 break;
             case KNIGHT:
-//                moves = knightMoves(board, myPosition);
+                moves = knightMoves(board, myPosition);
                 break;
             case ROOK:
                 moves = rookMoves(board, myPosition);
@@ -297,6 +297,57 @@ public class ChessPiece {
             lineR.add(newPos);
         }
         lines.add(lineR);
+
+        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        lines.forEach(line -> {
+            moves.addAll(processLine(board, myPosition, line));
+        });
+
+        return moves;
+    }
+
+    private Collection<ChessMove> knightMoves(ChessBoard board, ChessPosition myPosition) {
+        ArrayList<ArrayList<ChessPosition>> lines = new ArrayList<ArrayList<ChessPosition>>();
+
+        ArrayList<ChessPosition> lineUL = new ArrayList<ChessPosition>();
+        ChessPosition posUL = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn() - 1);
+        if (posUL.isInBounds()) lineUL.add(posUL);
+        lines.add(lineUL);
+
+        ArrayList<ChessPosition> lineUR = new ArrayList<ChessPosition>();
+        ChessPosition posUR = new ChessPosition(myPosition.getRow() + 2, myPosition.getColumn() + 1);
+        if (posUR.isInBounds()) lineUR.add(posUR);
+        lines.add(lineUR);
+
+        ArrayList<ChessPosition> lineDL = new ArrayList<ChessPosition>();
+        ChessPosition posDL = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn() - 1);
+        if (posDL.isInBounds()) lineDL.add(posDL);
+        lines.add(lineDL);
+
+        ArrayList<ChessPosition> lineDR = new ArrayList<ChessPosition>();
+        ChessPosition posDR = new ChessPosition(myPosition.getRow() - 2, myPosition.getColumn() + 1);
+        if (posDR.isInBounds()) lineDR.add(posDR);
+        lines.add(lineDR);
+
+        ArrayList<ChessPosition> lineLU = new ArrayList<ChessPosition>();
+        ChessPosition posLU = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() - 2);
+        if (posLU.isInBounds()) lineLU.add(posLU);
+        lines.add(lineLU);
+
+        ArrayList<ChessPosition> lineLD = new ArrayList<ChessPosition>();
+        ChessPosition posLD = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() - 2);
+        if (posLD.isInBounds()) lineLD.add(posLD);
+        lines.add(lineLD);
+
+        ArrayList<ChessPosition> lineRU = new ArrayList<ChessPosition>();
+        ChessPosition posRU = new ChessPosition(myPosition.getRow() + 1, myPosition.getColumn() + 2);
+        if (posRU.isInBounds()) lineRU.add(posRU);
+        lines.add(lineRU);
+
+        ArrayList<ChessPosition> lineRD = new ArrayList<ChessPosition>();
+        ChessPosition posRD = new ChessPosition(myPosition.getRow() - 1, myPosition.getColumn() + 2);
+        if (posRD.isInBounds()) lineRD.add(posRD);
+        lines.add(lineRD);
 
         Collection<ChessMove> moves = new HashSet<ChessMove>();
         lines.forEach(line -> {
