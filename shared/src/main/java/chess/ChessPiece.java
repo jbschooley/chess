@@ -72,7 +72,7 @@ public class ChessPiece {
                 moves = rookMoves(board, myPosition);
                 break;
             case PAWN:
-//                moves = pawnMoves(board, myPosition);
+                moves = pawnMoves(board, myPosition);
                 break;
         }
         return moves;
@@ -353,6 +353,62 @@ public class ChessPiece {
         lines.forEach(line -> {
             moves.addAll(processLine(board, myPosition, line));
         });
+
+        return moves;
+    }
+
+    private Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition myPosition) {
+        // this one is a bit different, because its move and capture directions are different and depend on the team
+
+        int moveDirection = pieceColor == ChessGame.TeamColor.WHITE ? 1 : -1;
+        Collection<ChessMove> moves = new HashSet<ChessMove>();
+
+        // move
+        ArrayList<ChessPosition> lineM = new ArrayList<ChessPosition>();
+        ChessPosition posM1 = new ChessPosition(myPosition.getRow() + moveDirection, myPosition.getColumn());
+        if (posM1.isInBounds()) lineM.add(posM1);
+
+        // if pawn is in starting position, it can move 2 spaces
+        if (myPosition.getRow() == (pieceColor == ChessGame.TeamColor.WHITE ? 2 : 7)) {
+            ChessPosition posM2 = new ChessPosition(myPosition.getRow() + moveDirection * 2, myPosition.getColumn());
+            if (posM2.isInBounds()) lineM.add(posM2);
+        }
+
+        for (ChessPosition pos : lineM) {
+            ChessMove move = isValidMove(board, myPosition, pos);
+            if (move != null) {
+                moves.add(move);
+            } else {
+                break;
+            }
+        };
+
+        // capture
+        ChessPosition posC1 = new ChessPosition(myPosition.getRow() + moveDirection, myPosition.getColumn() - 1);
+        ChessPosition posC2 = new ChessPosition(myPosition.getRow() + moveDirection, myPosition.getColumn() + 1);
+        ChessMove capture1 = isValidCapture(board, myPosition, posC1);
+        ChessMove capture2 = isValidCapture(board, myPosition, posC2);
+        if (capture1 != null) {
+            moves.add(capture1);
+        }
+        if (capture2 != null) {
+            moves.add(capture2);
+        }
+
+        // if any moves end on the last row, replace with promotion moves for all 4 piece types
+        Collection<ChessMove> promotionMoves = new HashSet<ChessMove>();
+        Collection<ChessMove> removeMoves = new HashSet<ChessMove>();
+        for (ChessMove move : moves) {
+            if (move.getEndPosition().getRow() == (pieceColor == ChessGame.TeamColor.WHITE ? 8 : 1)) {
+                removeMoves.add(move);
+                promotionMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.QUEEN));
+                promotionMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.ROOK));
+                promotionMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.BISHOP));
+                promotionMoves.add(new ChessMove(move.getStartPosition(), move.getEndPosition(), ChessPiece.PieceType.KNIGHT));
+            }
+        }
+        moves.removeAll(removeMoves);
+        moves.addAll(promotionMoves);
 
         return moves;
     }
