@@ -69,7 +69,7 @@ public class ChessPiece {
 //                moves = knightMoves(board, myPosition);
                 break;
             case ROOK:
-//                moves = rookMoves(board, myPosition);
+                moves = rookMoves(board, myPosition);
                 break;
             case PAWN:
 //                moves = pawnMoves(board, myPosition);
@@ -254,6 +254,49 @@ public class ChessPiece {
             lineDR.add(newPos);
         }
         lines.add(lineDR);
+
+        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        lines.forEach(line -> {
+            moves.addAll(processLine(board, myPosition, line));
+        });
+
+        return moves;
+    }
+
+    private Collection<ChessMove> rookMoves(ChessBoard board, ChessPosition myPosition) {
+        ArrayList<ArrayList<ChessPosition>> lines = new ArrayList<ArrayList<ChessPosition>>();
+
+        ArrayList<ChessPosition> lineU = new ArrayList<ChessPosition>();
+        for (int i = 1; i < 8; i++) {
+            ChessPosition newPos = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn());
+            if (!newPos.isInBounds()) break;
+            lineU.add(newPos);
+        }
+        lines.add(lineU);
+
+        ArrayList<ChessPosition> lineD = new ArrayList<ChessPosition>();
+        for (int i = 1; i < 8; i++) {
+            ChessPosition newPos = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn());
+            if (!newPos.isInBounds()) break;
+            lineD.add(newPos);
+        }
+        lines.add(lineD);
+
+        ArrayList<ChessPosition> lineL = new ArrayList<ChessPosition>();
+        for (int i = 1; i < 8; i++) {
+            ChessPosition newPos = new ChessPosition(myPosition.getRow(), myPosition.getColumn() - i);
+            if (!newPos.isInBounds()) break;
+            lineL.add(newPos);
+        }
+        lines.add(lineL);
+
+        ArrayList<ChessPosition> lineR = new ArrayList<ChessPosition>();
+        for (int i = 1; i < 8; i++) {
+            ChessPosition newPos = new ChessPosition(myPosition.getRow(), myPosition.getColumn() + i);
+            if (!newPos.isInBounds()) break;
+            lineR.add(newPos);
+        }
+        lines.add(lineR);
 
         Collection<ChessMove> moves = new HashSet<ChessMove>();
         lines.forEach(line -> {
