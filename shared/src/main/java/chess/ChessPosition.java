@@ -34,6 +34,10 @@ public class ChessPosition {
         return col;
     }
 
+    public boolean isInBounds() {
+    	return row >= 1 && row <= 8 && col >= 1 && col <= 8;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

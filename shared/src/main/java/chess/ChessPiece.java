@@ -79,67 +79,44 @@ public class ChessPiece {
     }
 
     private Collection<ChessMove> bishopMoves(ChessBoard board, ChessPosition myPosition) {
-        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        ArrayList<ArrayList<ChessPosition>> lines = new ArrayList<ArrayList<ChessPosition>>();
+
+        ArrayList<ChessPosition> lineUR = new ArrayList<ChessPosition>();
         for (int i = 1; i < 8; i++) {
             ChessPosition newPos = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() + i);
-
-            ChessMove move = isValidMove(board, myPosition, newPos);
-            if (move != null) {
-                moves.add(move);
-            } else {
-                ChessMove capture = isValidCapture(board, myPosition, newPos);
-                if (capture != null) {
-                    moves.add(capture);
-                }
-                break;
-            }
-
+            if (!newPos.isInBounds()) break;
+            lineUR.add(newPos);
         }
+        lines.add(lineUR);
 
+        ArrayList<ChessPosition> lineDL = new ArrayList<ChessPosition>();
         for (int i = 1; i < 8; i++) {
             ChessPosition newPos = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() - i);
-
-            ChessMove move = isValidMove(board, myPosition, newPos);
-            if (move != null) {
-                moves.add(move);
-            } else {
-                ChessMove capture = isValidCapture(board, myPosition, newPos);
-                if (capture != null) {
-                    moves.add(capture);
-                }
-                break;
-            }
+            if (!newPos.isInBounds()) break;
+            lineDL.add(newPos);
         }
+        lines.add(lineDL);
 
+        ArrayList<ChessPosition> lineUL = new ArrayList<ChessPosition>();
         for (int i = 1; i < 8; i++) {
             ChessPosition newPos = new ChessPosition(myPosition.getRow() - i, myPosition.getColumn() + i);
-
-            ChessMove move = isValidMove(board, myPosition, newPos);
-            if (move != null) {
-                moves.add(move);
-            } else {
-                ChessMove capture = isValidCapture(board, myPosition, newPos);
-                if (capture != null) {
-                    moves.add(capture);
-                }
-                break;
-            }
+            if (!newPos.isInBounds()) break;
+            lineUL.add(newPos);
         }
+        lines.add(lineUL);
 
+        ArrayList<ChessPosition> lineDR = new ArrayList<ChessPosition>();
         for (int i = 1; i < 8; i++) {
             ChessPosition newPos = new ChessPosition(myPosition.getRow() + i, myPosition.getColumn() - i);
-
-            ChessMove move = isValidMove(board, myPosition, newPos);
-            if (move != null) {
-                moves.add(move);
-            } else {
-                ChessMove capture = isValidCapture(board, myPosition, newPos);
-                if (capture != null) {
-                    moves.add(capture);
-                }
-                break;
-            }
+            if (!newPos.isInBounds()) break;
+            lineDR.add(newPos);
         }
+        lines.add(lineDR);
+
+        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        lines.forEach(line -> {
+            moves.addAll(processLine(board, myPosition, line));
+        });
 
         return moves;
     }
@@ -169,13 +146,20 @@ public class ChessPiece {
         return null;
     }
 
-    private ChessMove isValidMoveOrCapture(ChessBoard board, ChessPosition myPosition, ChessPosition newPos) {
-        ChessMove move = isValidMove(board, myPosition, newPos);
-        if (move != null) {
-            return move;
-        } else {
-            ChessMove capture = isValidCapture(board, myPosition, newPos);
-            return capture;
-        }
+    private Collection<ChessMove> processLine(ChessBoard board, ChessPosition myPosition, ArrayList<ChessPosition> line) {
+        Collection<ChessMove> moves = new HashSet<ChessMove>();
+        for (ChessPosition pos : line) {
+            ChessMove move = isValidMove(board, myPosition, pos);
+            if (move != null) {
+                moves.add(move);
+            } else {
+                ChessMove capture = isValidCapture(board, myPosition, pos);
+                if (capture != null) {
+                    moves.add(capture);
+                }
+                break;
+            }
+        };
+        return moves;
     }
 }
