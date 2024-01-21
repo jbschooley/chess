@@ -57,7 +57,8 @@ public class ChessGame {
         // invalid if no piece at this position
         if (piece == null) return validMoves;
         // invalid if it is not the corresponding team's turn
-        if (getTeamTurn() != piece.getTeamColor()) return validMoves;
+        // TODO do this in makeMove
+        // if (getTeamTurn() != piece.getTeamColor()) return validMoves;
 
         // Calculate all moves for the piece at startPosition
         Collection<ChessMove> allMovesForPiece = piece.pieceMoves(board, startPosition);
@@ -71,7 +72,7 @@ public class ChessGame {
             board.addPiece(m.getStartPosition(), null);
 
             // check if in check
-            if (!isInCheck(getTeamTurn())) {
+            if (!isInCheck(piece.getTeamColor())) {
                 validMoves.add(m);
             }
 
