@@ -101,7 +101,7 @@ public class ChessGame {
             throw new InvalidMoveException("Not the corresponding team's turn");
         }
 
-        Collection<ChessMove> validMovesForPiece = piece.pieceMoves(board, move.getStartPosition());
+        Collection<ChessMove> validMovesForPiece = validMoves(move.getStartPosition());
 
         if (!validMovesForPiece.contains(move)) {
             throw new InvalidMoveException("Piece cannot move there or leaves the king in danger");
