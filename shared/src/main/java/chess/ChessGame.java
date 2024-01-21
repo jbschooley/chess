@@ -111,6 +111,9 @@ public class ChessGame {
         board.addPiece(move.getEndPosition(), piece);
         board.addPiece(move.getStartPosition(), null);
 
+        // promote piece
+        if (move.getPromotionPiece() != null) piece.setPieceType(move.getPromotionPiece());
+
         // change team color
         setTeamTurn(getTeamTurn() == TeamColor.WHITE ? TeamColor.BLACK : TeamColor.WHITE);
     }
