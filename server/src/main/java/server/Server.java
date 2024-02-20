@@ -12,6 +12,10 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.delete("/db", (req, res) -> {
+            // return empty response
+            return "";
+        });
 
         Spark.awaitInitialization();
         return Spark.port();
