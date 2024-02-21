@@ -10,6 +10,11 @@ public class MemoryUserDAO implements UserDAO {
 
     Collection<UserData> users = new HashSet<UserData>();
 
+    @Override
+    public void clear() throws DataAccessException {
+        users.clear();
+    }
+
     public UserData createUser(UserData u) throws DataAccessException {
         users.add(u);
         return u;

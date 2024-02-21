@@ -10,6 +10,11 @@ public class MemoryAuthDAO implements AuthDAO {
 
     Collection<AuthData> auths = new HashSet<AuthData>();
 
+    @Override
+    public void clear() throws DataAccessException {
+        auths.clear();
+    }
+
     public AuthData createAuth(String username) throws DataAccessException {
         String token = UUID.randomUUID().toString();
         AuthData a = new AuthData(token, username);

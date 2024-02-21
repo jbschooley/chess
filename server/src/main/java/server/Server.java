@@ -1,10 +1,17 @@
 package server;
 
+import dataAccess.*;
+import service.ClearService;
 import spark.*;
 
 import java.nio.file.Paths;
 
 public class Server {
+
+    GameDAO gameDao = new MemoryGameDAO();
+    AuthDAO authDao = new MemoryAuthDAO();
+    UserDAO userDao = new MemoryUserDAO();
+    ClearService clearService = new ClearService(gameDao, authDao, userDao);
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -13,7 +20,7 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", (req, res) -> {
-            // return empty response
+            clearService.clear();
             return "";
         });
 
@@ -24,5 +31,9 @@ public class Server {
     public void stop() {
         Spark.stop();
         Spark.awaitStop();
+    }
+
+    void ClearHandler() throws DataAccessException {
+        clearService.clear();
     }
 }
