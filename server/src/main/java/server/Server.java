@@ -34,6 +34,7 @@ public class Server {
         Spark.delete("/db", this::clearHandler);
         Spark.post("/user", this::registerHandler);
         Spark.post("/session", this::loginHandler);
+        Spark.delete("/session", this::logoutHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -84,6 +85,17 @@ public class Server {
             return errorJson("unauthorized");
         } catch (DataAccessException e) {
             return descriptionError(res);
+        }
+    }
+
+    Object logoutHandler(Request req, Response res) {
+        String authToken = req.headers("authorization");
+        try {
+            userService.logout(authToken);
+            return "";
+        } catch (DataAccessException e) {
+            res.status(401);
+            return errorJson("unauthorized");
         }
     }
 
