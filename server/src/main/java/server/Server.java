@@ -2,12 +2,15 @@ package server;
 
 import com.google.gson.Gson;
 import dataAccess.*;
+import exceptions.UnauthorizedException;
 import exceptions.UserAlreadyTakenException;
 import model.AuthData;
 import model.UserData;
 import service.ClearService;
 import service.UserService;
 import spark.*;
+
+record LoginRequest(String username, String password) {}
 
 public class Server {
 
@@ -29,8 +32,8 @@ public class Server {
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::clearHandler);
-
-        Spark.post("/user", this::register);
+        Spark.post("/user", this::registerHandler);
+        Spark.post("/session", this::loginHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -41,12 +44,17 @@ public class Server {
         Spark.awaitStop();
     }
 
-    Object clearHandler(Request req, Response res) throws DataAccessException {
-        clearService.clear();
+    Object clearHandler(Request req, Response res) {
+        try {
+            clearService.clear();
+        } catch (DataAccessException e) {
+            res.status(500);
+            return "{ \"message\": \"Error: description\" }";
+        }
         return "";
     }
 
-    Object register(Request req, Response res) throws DataAccessException {
+    Object registerHandler(Request req, Response res) {
         UserData u = serializer.fromJson(req.body(), UserData.class);
         if (u.username() == null || u.password() == null || u.email() == null) {
             return badRequest(res);
@@ -63,6 +71,22 @@ public class Server {
         }
     }
 
+    Object loginHandler(Request req, Response res) {
+        LoginRequest lr = serializer.fromJson(req.body(), LoginRequest.class);
+        if (lr.username() == null || lr.password() == null) {
+            return badRequest(res);
+        }
+        try {
+            AuthData a = userService.login(lr.username(), lr.password());
+            return serializer.toJson(a);
+        } catch (UnauthorizedException e) {
+            res.status(401);
+            return errorJson("unauthorized");
+        } catch (DataAccessException e) {
+            return descriptionError(res);
+        }
+    }
+
     String errorJson(String message) {
         return "{ \"message\": \"Error: " + message + "\" }";
     }
@@ -70,5 +94,10 @@ public class Server {
     String badRequest(Response res) {
         res.status(400);
         return errorJson("bad request");
+    }
+
+    String descriptionError(Response res) {
+        res.status(500);
+        return errorJson("description");
     }
 }

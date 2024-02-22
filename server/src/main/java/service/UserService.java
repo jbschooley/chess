@@ -4,11 +4,10 @@ import com.google.gson.Gson;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.UserDAO;
+import exceptions.UnauthorizedException;
 import exceptions.UserAlreadyTakenException;
 import model.AuthData;
 import model.UserData;
-
-//record LoginResult(String username, String authToken) {}
 
 public class UserService {
 
@@ -32,8 +31,12 @@ public class UserService {
         }
     }
 
-    public AuthData login(UserData user) {
-        return null;
+    public AuthData login(String username, String password) throws DataAccessException, UnauthorizedException {
+        if (userDao.checkPassword(username, password)) {
+            return authDao.createAuth(username);
+        } else {
+            throw new UnauthorizedException();
+        }
     }
 
     public void logout(UserData user) {}
