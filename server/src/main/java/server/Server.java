@@ -5,12 +5,17 @@ import dataAccess.*;
 import exceptions.UnauthorizedException;
 import exceptions.UserAlreadyTakenException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import service.ClearService;
+import service.GameService;
 import service.UserService;
 import spark.*;
 
+import java.util.Collection;
+
 record LoginRequest(String username, String password) {}
+record ListGamesResponse(Collection<GameData> games) {}
 
 public class Server {
 
@@ -24,6 +29,7 @@ public class Server {
     // Services
     ClearService clearService = new ClearService(gameDao, authDao, userDao);
     UserService userService = new UserService(authDao, userDao);
+    GameService gameService = new GameService(authDao, userDao, gameDao);
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -35,6 +41,7 @@ public class Server {
         Spark.post("/user", this::registerHandler);
         Spark.post("/session", this::loginHandler);
         Spark.delete("/session", this::logoutHandler);
+        Spark.get("/game", this::listGamesHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -49,8 +56,7 @@ public class Server {
         try {
             clearService.clear();
         } catch (DataAccessException e) {
-            res.status(500);
-            return "{ \"message\": \"Error: description\" }";
+            dataAccessError(res);
         }
         return "";
     }
@@ -81,10 +87,9 @@ public class Server {
             AuthData a = userService.login(lr.username(), lr.password());
             return serializer.toJson(a);
         } catch (UnauthorizedException e) {
-            res.status(401);
-            return errorJson("unauthorized");
+            return unauthorizedError(res);
         } catch (DataAccessException e) {
-            return descriptionError(res);
+            return dataAccessError(res);
         }
     }
 
@@ -94,8 +99,17 @@ public class Server {
             userService.logout(authToken);
             return "";
         } catch (DataAccessException e) {
-            res.status(401);
-            return errorJson("unauthorized");
+            return unauthorizedError(res);
+        }
+    }
+
+    Object listGamesHandler(Request req, Response res) {
+        String authToken = req.headers("authorization");
+        try {
+            Collection<GameData> games = gameService.listGames(authToken);
+            return serializer.toJson(new ListGamesResponse(games));
+        } catch (UnauthorizedException e) {
+            return unauthorizedError(res);
         }
     }
 
@@ -108,8 +122,13 @@ public class Server {
         return errorJson("bad request");
     }
 
-    String descriptionError(Response res) {
+    String unauthorizedError(Response res) {
+        res.status(401);
+        return errorJson("unauthorized");
+    }
+
+    String dataAccessError(Response res) {
         res.status(500);
-        return errorJson("description");
+        return errorJson("data access");
     }
 }
