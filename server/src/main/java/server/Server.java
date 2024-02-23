@@ -16,6 +16,8 @@ import java.util.Collection;
 
 record LoginRequest(String username, String password) {}
 record ListGamesResponse(Collection<GameData> games) {}
+record CreateGameRequest(String gameName) {}
+record CreateGameResponse(int gameID) {}
 
 public class Server {
 
@@ -42,6 +44,7 @@ public class Server {
         Spark.post("/session", this::loginHandler);
         Spark.delete("/session", this::logoutHandler);
         Spark.get("/game", this::listGamesHandler);
+        Spark.post("/game", this::createGameHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -108,6 +111,20 @@ public class Server {
         try {
             Collection<GameData> games = gameService.listGames(authToken);
             return serializer.toJson(new ListGamesResponse(games));
+        } catch (UnauthorizedException e) {
+            return unauthorizedError(res);
+        }
+    }
+
+    Object createGameHandler(Request req, Response res) {
+        String authToken = req.headers("authorization");
+        CreateGameRequest cg = serializer.fromJson(req.body(), CreateGameRequest.class);
+        if (authToken == null || cg.gameName() == null) {
+            return badRequest(res);
+        }
+        try {
+            int gameID = gameService.createGame(authToken, cg.gameName());
+            return serializer.toJson(new CreateGameResponse(gameID));
         } catch (UnauthorizedException e) {
             return unauthorizedError(res);
         }

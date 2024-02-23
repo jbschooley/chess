@@ -14,8 +14,13 @@ public class MemoryGameDAO implements GameDAO {
     }
 
     public GameData createGame(String name) throws DataAccessException {
-        int lastID = games.lastKey();
-        int thisID = lastID + 1;
+        int thisID;
+        try {
+            int lastID = games.lastKey();
+            thisID = lastID + 1;
+        } catch (NoSuchElementException e) {
+            thisID = 1;
+        }
         ChessGame cg = new ChessGame();
         GameData g = new GameData(thisID, null, null, name, cg);
         games.put(thisID, g);
