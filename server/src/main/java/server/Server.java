@@ -155,8 +155,10 @@ public class Server {
                 }
                 return "";
             } else {
-                // TODO join as observer
-                return "doesn't work yet";
+                // TODO Phase 6 join as observer
+                // check authentication
+                GameData g = gameService.getGame(authToken, jg.gameID());
+                return "";
             }
         } catch (UnauthorizedException e) {
             return unauthorizedError(res);

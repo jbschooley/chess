@@ -43,6 +43,15 @@ public class GameService {
         }
     }
 
+    public GameData getGame(String authToken, int gameID) throws UnauthorizedException {
+        try {
+            AuthData a = authDao.getAuth(authToken);
+            return gameDao.getGame(gameID);
+        } catch (DataAccessException e) {
+            throw new UnauthorizedException();
+        }
+    }
+
     public void joinGamePlayer(String authToken, int gameID, ChessGame.TeamColor playerColor) throws UnauthorizedException, AlreadyTakenException {
         try {
             AuthData a = authDao.getAuth(authToken);
