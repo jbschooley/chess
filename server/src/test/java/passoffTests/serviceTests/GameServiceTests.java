@@ -1,8 +1,11 @@
 package passoffTests.serviceTests;
 
+import chess.ChessGame;
 import dataAccess.*;
+import exceptions.AlreadyTakenException;
 import exceptions.UnauthorizedException;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
 import passoffTests.testClasses.TestException;
@@ -76,4 +79,47 @@ public class GameServiceTests {
         Assertions.assertThrows(UnauthorizedException.class, () -> gameService.createGame("wrong", "nope"));
 
     }
+
+    @Test
+    @DisplayName("Get Game")
+    public void getGame() throws TestException, UnauthorizedException {
+        String name = "testgame";
+
+        int gameID = gameService.createGame(auth.authToken(), name);
+        GameData g = gameService.getGame(auth.authToken(), gameID);
+        Assertions.assertEquals(g.gameName(), name);
+    }
+
+    @Test
+    @DisplayName("Get Game Unauthorized")
+    public void getGameUnauthorized() throws TestException {
+        // verify it checks auth
+        Assertions.assertThrows(UnauthorizedException.class, () -> gameService.getGame("wrong", 123));
+    }
+
+    @Test
+    @DisplayName("Join Game as Player")
+    public void joinGamePlayer() throws TestException, UnauthorizedException, AlreadyTakenException {
+        String name = "testgame";
+        int gameID = gameService.createGame(auth.authToken(), name);
+
+        gameService.joinGamePlayer(auth.authToken(), gameID, ChessGame.TeamColor.WHITE);
+        GameData g = gameService.getGame(auth.authToken(), gameID);
+        Assertions.assertEquals(g.whiteUsername(), testUserUsername);
+    }
+
+    @Test
+    @DisplayName("Join Game Already Taken")
+    public void joinGamePlayerAlreadyTaken() throws TestException, UnauthorizedException, AlreadyTakenException {
+        String name = "testgame";
+        int gameID = gameService.createGame(auth.authToken(), name);
+
+        // join game
+        gameService.joinGamePlayer(auth.authToken(), gameID, ChessGame.TeamColor.WHITE);
+
+        // join game again
+        Assertions.assertThrows(AlreadyTakenException.class, () -> gameService.joinGamePlayer(auth.authToken(), gameID, ChessGame.TeamColor.WHITE));
+    }
+
+
 }
