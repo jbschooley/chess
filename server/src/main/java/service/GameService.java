@@ -1,9 +1,11 @@
 package service;
 
+import chess.ChessGame;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
 import dataAccess.UserDAO;
+import exceptions.AlreadyTakenException;
 import exceptions.UnauthorizedException;
 import model.AuthData;
 import model.GameData;
@@ -36,6 +38,20 @@ public class GameService {
             AuthData a = authDao.getAuth(authToken);
             GameData g = gameDao.createGame(name);
             return g.gameID();
+        } catch (DataAccessException e) {
+            throw new UnauthorizedException();
+        }
+    }
+
+    public void joinGamePlayer(String authToken, int gameID, ChessGame.TeamColor playerColor) throws UnauthorizedException, AlreadyTakenException {
+        try {
+            AuthData a = authDao.getAuth(authToken);
+            GameData g = gameDao.getGame(gameID);
+            if ((playerColor == ChessGame.TeamColor.WHITE && g.whiteUsername() != null) ||
+                    (playerColor == ChessGame.TeamColor.BLACK && g.blackUsername() != null)) {
+                throw new AlreadyTakenException();
+            }
+            g = gameDao.updateGameUsername(gameID, playerColor, a.username());
         } catch (DataAccessException e) {
             throw new UnauthorizedException();
         }

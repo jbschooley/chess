@@ -1,7 +1,9 @@
 package server;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import dataAccess.*;
+import exceptions.AlreadyTakenException;
 import exceptions.UnauthorizedException;
 import exceptions.UserAlreadyTakenException;
 import model.AuthData;
@@ -18,6 +20,7 @@ record LoginRequest(String username, String password) {}
 record ListGamesResponse(Collection<GameData> games) {}
 record CreateGameRequest(String gameName) {}
 record CreateGameResponse(int gameID) {}
+record JoinGameRequest(int gameID, String playerColor) {}
 
 public class Server {
 
@@ -45,6 +48,7 @@ public class Server {
         Spark.delete("/session", this::logoutHandler);
         Spark.get("/game", this::listGamesHandler);
         Spark.post("/game", this::createGameHandler);
+        Spark.put("/game", this::putGameHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -128,6 +132,35 @@ public class Server {
         } catch (UnauthorizedException e) {
             return unauthorizedError(res);
         }
+    }
+
+    Object putGameHandler(Request req, Response res) {
+        String authToken = req.headers("authorization");
+        JoinGameRequest jg = serializer.fromJson(req.body(), JoinGameRequest.class);
+        if (authToken == null || jg.gameID() == 0) {
+            return badRequest(res);
+        }
+        try {
+            if (jg.playerColor() != null) {
+                switch (jg.playerColor()) {
+                    case "WHITE" -> gameService.joinGamePlayer(authToken, jg.gameID(), ChessGame.TeamColor.WHITE);
+                    case "BLACK" -> gameService.joinGamePlayer(authToken, jg.gameID(), ChessGame.TeamColor.BLACK);
+                    default -> {
+                        return badRequest(res);
+                    }
+                }
+                return "";
+            } else {
+                // TODO join as observer
+                return "doesn't work yet";
+            }
+        } catch (UnauthorizedException e) {
+            return unauthorizedError(res);
+        } catch (AlreadyTakenException e) {
+            res.status(403);
+            return errorJson("already taken");
+        }
+
     }
 
     String errorJson(String message) {
