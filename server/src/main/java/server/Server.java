@@ -36,6 +36,10 @@ public class Server {
     UserService userService = new UserService(authDao, userDao);
     GameService gameService = new GameService(authDao, userDao, gameDao);
 
+    public static void main(String[] args) {
+        new Server().run(8080);
+    }
+
     public int run(int desiredPort) {
         Spark.port(desiredPort);
 
