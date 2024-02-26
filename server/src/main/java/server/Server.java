@@ -155,7 +155,7 @@ public class Server {
                 }
                 return "";
             } else {
-                // TODO Phase 6 join as observer
+                // TO DO Phase 6 join as observer
                 // check authentication
                 GameData g = gameService.getGame(authToken, jg.gameID());
                 return "";

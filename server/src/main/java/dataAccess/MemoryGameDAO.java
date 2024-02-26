@@ -50,10 +50,10 @@ public class MemoryGameDAO implements GameDAO {
         return gNew;
     }
 
-    public GameData updateGameData(int id, ChessGame game) throws DataAccessException {
-        GameData gOld = games.get(id);
-        GameData gNew = new GameData(id, gOld.whiteUsername(), gOld.blackUsername(), gOld.gameName(), game);
-        games.replace(id, gNew);
-        return gNew;
-    }
+//    public GameData updateGameData(int id, ChessGame game) throws DataAccessException {
+//        GameData gOld = games.get(id);
+//        GameData gNew = new GameData(id, gOld.whiteUsername(), gOld.blackUsername(), gOld.gameName(), game);
+//        games.replace(id, gNew);
+//        return gNew;
+//    }
 }
