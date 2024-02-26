@@ -14,6 +14,7 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
 record LoginRequest(String username, String password) {}
@@ -29,7 +30,7 @@ public class Server {
     // DAOs
     GameDAO gameDao = new MemoryGameDAO();
     AuthDAO authDao = new MemoryAuthDAO();
-    UserDAO userDao = new MemoryUserDAO();
+    UserDAO userDao;
 
     // Services
     ClearService clearService = new ClearService(gameDao, authDao, userDao);
@@ -44,6 +45,13 @@ public class Server {
         Spark.port(desiredPort);
 
         Spark.staticFiles.location("web");
+
+        // Initialize DAOs
+        try {
+            userDao = new SqlUserDAO();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
 
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::clearHandler);
