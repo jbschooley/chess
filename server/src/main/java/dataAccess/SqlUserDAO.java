@@ -18,41 +18,65 @@ public class SqlUserDAO implements UserDAO {
     @Override
     public void clear() throws DataAccessException {
         String statement = """
-                TRUNCATE TABLE user;
-                TRUNCATE TABLE game;
-                TRUNCATE TABLE auth;
+                DELETE FROM game;
+                DELETE FROM auth;
+                DELETE FROM user;
                 """;
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
-                var rs = preparedStatement.executeQuery();
+                var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
+            System.out.println(e.toString());
             throw new DataAccessException("SQL error");
         }
     }
 
     public UserData createUser(UserData u) throws DataAccessException {
-        users.add(u);
+        String statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, u.username());
+                preparedStatement.setString(2, u.password()); // TODO bcrypt
+                preparedStatement.setString(3, u.email());
+                var rs = preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            throw new DataAccessException("SQL error");
+        }
         return u;
     }
 
     public UserData getUser(String username) throws DataAccessException {
-        // yes I know this is inefficient, but it'll do the job
-        for (UserData u : users) {
-            if (u.username().equals(username)) {
-                return u;
+        String statement = "SELECT * FROM user WHERE username = ?";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, username);
+                var rs = preparedStatement.executeQuery();
+                if (rs.next()) {
+                    return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                } else {
+                    throw new DataAccessException("User not found");
+                }
             }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            throw new DataAccessException("SQL error");
         }
-        throw new DataAccessException("User not found");
     }
 
-    public boolean checkPassword(String username, String password) {
-        UserData u = null;
-        try {
-            u = getUser(username);
-            return u.password().equals(password);
-        } catch (DataAccessException e) {
-            return false;
+    public boolean checkPassword(String username, String password) throws DataAccessException {
+        String statement = "SELECT * FROM user WHERE username = ? AND password = ?";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, username); // TODO bcrypt
+                var rs = preparedStatement.executeQuery();
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            throw new DataAccessException("SQL error");
         }
     }
 }

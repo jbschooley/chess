@@ -33,9 +33,9 @@ public class Server {
     UserDAO userDao;
 
     // Services
-    ClearService clearService = new ClearService(gameDao, authDao, userDao);
-    UserService userService = new UserService(authDao, userDao);
-    GameService gameService = new GameService(authDao, userDao, gameDao);
+    ClearService clearService;
+    UserService userService;
+    GameService gameService;
 
     public static void main(String[] args) {
         new Server().run(8080);
@@ -46,9 +46,13 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        // Initialize DAOs
+        // Initialize DAOs and services
         try {
             userDao = new SqlUserDAO();
+
+            clearService = new ClearService(gameDao, authDao, userDao);
+            userService = new UserService(authDao, userDao);
+            gameService = new GameService(authDao, userDao, gameDao);
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }

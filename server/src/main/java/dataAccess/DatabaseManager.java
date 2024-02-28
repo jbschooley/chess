@@ -24,7 +24,7 @@ public class DatabaseManager {
 
                 var host = props.getProperty("db.host");
                 var port = Integer.parseInt(props.getProperty("db.port"));
-                connectionUrl = String.format("jdbc:mysql://%s:%d", host, port);
+                connectionUrl = String.format("jdbc:mysql://%s:%d?allowMultiQueries=true", host, port);
             }
         } catch (Exception ex) {
             throw new RuntimeException("unable to process db.properties. " + ex.getMessage());
@@ -43,14 +43,14 @@ public class DatabaseManager {
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """,
             """
-            CREATE TABLE `auth` (
+            CREATE TABLE IF NOT EXISTS `auth` (
               `username` varchar(256) NOT NULL,
               `authToken` varchar(256) DEFAULT NULL,
               CONSTRAINT `auth_FK` FOREIGN KEY (`username`) REFERENCES `user` (`username`) ON DELETE CASCADE
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
             """,
             """
-            CREATE TABLE `game` (
+            CREATE TABLE IF NOT EXISTS `game` (
               `gameID` int NOT NULL AUTO_INCREMENT,
               `gameName` varchar(256) DEFAULT NULL,
               `whiteUsername` varchar(256) DEFAULT NULL,
