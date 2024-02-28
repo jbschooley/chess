@@ -29,7 +29,7 @@ public class Server {
 
     // DAOs
     GameDAO gameDao = new MemoryGameDAO();
-    AuthDAO authDao = new MemoryAuthDAO();
+    AuthDAO authDao;
     UserDAO userDao;
 
     // Services
@@ -49,6 +49,7 @@ public class Server {
         // Initialize DAOs and services
         try {
             userDao = new SqlUserDAO();
+            authDao = new SqlAuthDAO();
 
             clearService = new ClearService(gameDao, authDao, userDao);
             userService = new UserService(authDao, userDao);

@@ -1,23 +1,20 @@
 package dataAccess;
 
+import model.AuthData;
 import model.UserData;
 
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.UUID;
 
+public class SqlAuthDAO implements AuthDAO {
 
-public class SqlUserDAO implements UserDAO {
-
-    Collection<UserData> users = new HashSet<UserData>();
-
-    public SqlUserDAO() throws DataAccessException {
-        DatabaseManager.createDatabase();
-    }
+    Collection<AuthData> auths = new HashSet<AuthData>();
 
     @Override
     public void clear() throws DataAccessException {
-        String statement = "DELETE FROM user";
+        String statement = "DELETE FROM auth";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 var rs = preparedStatement.executeUpdate();
@@ -28,32 +25,35 @@ public class SqlUserDAO implements UserDAO {
         }
     }
 
-    public UserData createUser(UserData u) throws DataAccessException {
-        String statement = "INSERT INTO user (username, password, email) VALUES (?, ?, ?)";
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1, u.username());
-                preparedStatement.setString(2, u.password()); // TODO bcrypt
-                preparedStatement.setString(3, u.email());
-                var rs = preparedStatement.executeUpdate();
-            }
-        } catch (SQLException e) {
-            System.out.println(e.toString());
-            throw new DataAccessException("SQL error");
-        }
-        return u;
-    }
+    public AuthData createAuth(String username) throws DataAccessException {
+        String token = UUID.randomUUID().toString();
 
-    public UserData getUser(String username) throws DataAccessException {
-        String statement = "SELECT * FROM user WHERE username = ?";
+        String statement = "INSERT INTO auth (username, authToken) VALUES (?, ?)";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, username);
+                preparedStatement.setString(2, token);
+                var rs = preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            System.out.println(e.toString());
+            throw new DataAccessException("SQL error");
+        }
+
+        AuthData a = new AuthData(token, username);
+        return a;
+    }
+
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        String statement = "SELECT * FROM auth WHERE authToken = ?";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, authToken);
                 var rs = preparedStatement.executeQuery();
                 if (rs.next()) {
-                    return new UserData(rs.getString("username"), rs.getString("password"), rs.getString("email"));
+                    return new AuthData(rs.getString("username"), rs.getString("authToken"));
                 } else {
-                    throw new DataAccessException("User not found");
+                    throw new DataAccessException("Auth token does not exist");
                 }
             }
         } catch (SQLException e) {
@@ -62,13 +62,12 @@ public class SqlUserDAO implements UserDAO {
         }
     }
 
-    public boolean checkPassword(String username, String password) throws DataAccessException {
-        String statement = "SELECT * FROM user WHERE username = ? AND password = ?";
+    public void deleteAuth(String authToken) throws DataAccessException {
+        String statement = "DELETE FROM auth WHERE authToken = ?";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1, username); // TODO bcrypt
-                var rs = preparedStatement.executeQuery();
-                return rs.next();
+                preparedStatement.setString(1, authToken);
+                var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
             System.out.println(e.toString());
