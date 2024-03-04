@@ -28,7 +28,7 @@ public class Server {
     Gson serializer = new Gson();
 
     // DAOs
-    GameDAO gameDao = new MemoryGameDAO();
+    GameDAO gameDao;
     AuthDAO authDao;
     UserDAO userDao;
 
@@ -50,6 +50,7 @@ public class Server {
         try {
             userDao = new SqlUserDAO();
             authDao = new SqlAuthDAO();
+            gameDao = new SqlGameDAO();
 
             clearService = new ClearService(gameDao, authDao, userDao);
             userService = new UserService(authDao, userDao);

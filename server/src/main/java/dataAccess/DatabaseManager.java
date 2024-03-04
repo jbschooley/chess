@@ -1,6 +1,7 @@
 package dataAccess;
 
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Properties;
 
 public class DatabaseManager {
@@ -55,6 +56,7 @@ public class DatabaseManager {
               `gameName` varchar(256) DEFAULT NULL,
               `whiteUsername` varchar(256) DEFAULT NULL,
               `blackUsername` varchar(256) DEFAULT NULL,
+              `game` json DEFAULT NULL,
               PRIMARY KEY (`gameID`),
               KEY `game_whiteUsername_FK` (`whiteUsername`),
               KEY `game_blackUsername_FK` (`blackUsername`),

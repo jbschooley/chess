@@ -3,6 +3,7 @@ package dataAccess;
 import model.UserData;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -23,7 +24,7 @@ public class SqlUserDAO implements UserDAO {
                 var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
     }
@@ -38,7 +39,7 @@ public class SqlUserDAO implements UserDAO {
                 var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
         return u;
@@ -57,7 +58,7 @@ public class SqlUserDAO implements UserDAO {
                 }
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
     }
@@ -66,12 +67,13 @@ public class SqlUserDAO implements UserDAO {
         String statement = "SELECT * FROM user WHERE username = ? AND password = ?";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
-                preparedStatement.setString(1, username); // TODO bcrypt
+                preparedStatement.setString(1, username);
+                preparedStatement.setString(2, password); // TODO bcrypt
                 var rs = preparedStatement.executeQuery();
                 return rs.next();
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
     }

@@ -4,6 +4,7 @@ import model.AuthData;
 import model.UserData;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -20,7 +21,7 @@ public class SqlAuthDAO implements AuthDAO {
                 var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
     }
@@ -36,7 +37,7 @@ public class SqlAuthDAO implements AuthDAO {
                 var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
 
@@ -51,13 +52,13 @@ public class SqlAuthDAO implements AuthDAO {
                 preparedStatement.setString(1, authToken);
                 var rs = preparedStatement.executeQuery();
                 if (rs.next()) {
-                    return new AuthData(rs.getString("username"), rs.getString("authToken"));
+                    return new AuthData(rs.getString("authToken"), rs.getString("username"));
                 } else {
                     throw new DataAccessException("Auth token does not exist");
                 }
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
     }
@@ -70,7 +71,7 @@ public class SqlAuthDAO implements AuthDAO {
                 var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
-            System.out.println(e.toString());
+            e.printStackTrace();
             throw new DataAccessException("SQL error");
         }
     }
