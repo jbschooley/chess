@@ -106,10 +106,11 @@ public class SqlGameDAO implements GameDAO {
             case BLACK -> colorField = "blackUsername";
             default -> throw new DataAccessException("Invalid color");
         }
-        String statement = "UPDATE game SET " + colorField + " = ?";
+        String statement = "UPDATE game SET " + colorField + " = ? WHERE gameID = ?;";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, username);
+                preparedStatement.setInt(2, id);
                 var rs = preparedStatement.executeUpdate();
             }
         } catch (SQLException e) {
