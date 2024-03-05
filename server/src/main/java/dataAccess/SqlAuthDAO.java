@@ -69,6 +69,7 @@ public class SqlAuthDAO implements AuthDAO {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 preparedStatement.setString(1, authToken);
                 var rs = preparedStatement.executeUpdate();
+                if (rs == 0) throw new DataAccessException("Auth token does not exist");
             }
         } catch (SQLException e) {
             e.printStackTrace();
