@@ -9,14 +9,15 @@ import model.UserData;
 import org.junit.jupiter.api.*;
 import passoffTests.testClasses.TestException;
 import service.ClearService;
+import service.GameService;
 import service.UserService;
 
 public class UserServiceTests {
 
     // DAOs
-    GameDAO gameDao = new MemoryGameDAO();
-    AuthDAO authDao = new MemoryAuthDAO();
-    UserDAO userDao = new MemoryUserDAO();
+    GameDAO gameDao;
+    AuthDAO authDao;
+    UserDAO userDao;
 
     ClearService clearService = new ClearService(gameDao, authDao, userDao);
     UserService userService = new UserService(authDao, userDao);
@@ -28,6 +29,19 @@ public class UserServiceTests {
 
     @BeforeEach
     public void setup() throws TestException, DataAccessException {
+
+        // Initialize DAOs and services
+        try {
+            userDao = new SqlUserDAO();
+            authDao = new SqlAuthDAO();
+            gameDao = new SqlGameDAO();
+
+            clearService = new ClearService(gameDao, authDao, userDao);
+            userService = new UserService(authDao, userDao);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+
         clearService.clear();
 
         // create test user
@@ -38,7 +52,7 @@ public class UserServiceTests {
     @Test
     @Order(1)
     @DisplayName("Register New User")
-    public void registerNewUser() throws TestException, DataAccessException, UserAlreadyTakenException {
+    public void registerNewUser() throws TestException, DataAccessException, UserAlreadyTakenException, UnauthorizedException {
         String newUsername = "testUser2";
         UserData u = new UserData(newUsername, testUserPassword, testUserEmail);
 
@@ -47,7 +61,8 @@ public class UserServiceTests {
 
         // test user exists
         UserData uTest = new UserData(newUsername, testUserPassword, testUserEmail);
-        Assertions.assertEquals(userDao.getUser(newUsername), u);
+        Assertions.assertEquals(userDao.getUser(newUsername).username(), u.username());
+        Assertions.assertEquals(userDao.getUser(newUsername).email(), u.email());
     }
 
     @Test

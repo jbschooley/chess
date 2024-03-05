@@ -16,9 +16,9 @@ import service.UserService;
 public class GameServiceTests {
 
     // DAOs
-    GameDAO gameDao = new MemoryGameDAO();
-    AuthDAO authDao = new MemoryAuthDAO();
-    UserDAO userDao = new MemoryUserDAO();
+    GameDAO gameDao;
+    AuthDAO authDao;
+    UserDAO userDao;
 
     ClearService clearService = new ClearService(gameDao, authDao, userDao);
     UserService userService = new UserService(authDao, userDao);
@@ -33,6 +33,19 @@ public class GameServiceTests {
 
     @BeforeEach
     public void setup() throws TestException, DataAccessException, UnauthorizedException {
+        // Initialize DAOs and services
+        try {
+            userDao = new SqlUserDAO();
+            authDao = new SqlAuthDAO();
+            gameDao = new SqlGameDAO();
+
+            clearService = new ClearService(gameDao, authDao, userDao);
+            userService = new UserService(authDao, userDao);
+            gameService = new GameService(authDao, userDao, gameDao);
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+
         clearService.clear();
 
         // create test user

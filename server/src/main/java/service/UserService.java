@@ -24,7 +24,7 @@ public class UserService {
         try {
             userDao.getUser(user.username());
             throw new UserAlreadyTakenException();
-        } catch (DataAccessException e) {
+        } catch (UnauthorizedException e) {
             // user does not exist, so create new
             userDao.createUser(user);
             return authDao.createAuth(user.username());
