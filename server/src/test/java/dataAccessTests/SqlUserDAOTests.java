@@ -1,4 +1,4 @@
-package passoffTests.dataAccessTests;
+package dataAccessTests;
 import exceptions.UnauthorizedException;
 import model.UserData;
 import org.junit.jupiter.api.*;
