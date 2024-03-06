@@ -69,5 +69,5 @@ public class SqlAuthDAOTests {
     public void deleteAuthFailInvalid() {
         Assertions.assertThrows(DataAccessException.class, () -> authDao.deleteAuth("faketoken"));
     }
-    
+
 }
