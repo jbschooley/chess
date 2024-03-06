@@ -1,4 +1,4 @@
-package passoffTests.serviceTests;
+package serviceTests;
 
 import chess.ChessGame;
 import dataAccess.*;
