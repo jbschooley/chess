@@ -1,12 +1,16 @@
 package ui;
 
 import model.AuthData;
+import serverAccess.ServerFacade;
 
 import java.util.Scanner;
 
 public class UI {
     AuthData auth = null;
-    public UI() {
+    ServerFacade facade;
+
+    public UI(ServerFacade facade) {
+        this.facade = facade;
         System.out.println(EscapeSequences.SET_TEXT_COLOR_WHITE + "♕ Welcome to 240 Chess. Type Help to get started. ♕\n");
 
         while (true) {
@@ -16,15 +20,19 @@ public class UI {
             String line = scanner.nextLine();
             String[] args = line.split(" ");
 
-            if (loggedIn) {
-                uiPostLogin(args);
-            } else {
-                uiPreLogin(args);
+            try {
+                if (loggedIn) {
+                    uiPostLogin(args);
+                } else {
+                    uiPreLogin(args);
+                }
+            } catch (Exception e) {
+                System.out.println("An error occurred: " + e.getMessage());
             }
         }
     }
 
-    private void uiPreLogin(String[] args) {
+    private void uiPreLogin(String[] args) throws Exception {
         switch (args[0].toLowerCase()) {
             case "help":
                 System.out.println(
@@ -39,7 +47,8 @@ public class UI {
                 break;
             case "register":
                 System.out.println("Registering...");
-                // TODO: register
+                auth = facade.register(args[1], args[2], args[3]);
+                System.out.println("Registered as " + auth.username());
                 break;
             case "login":
                 System.out.println("Logging in...");
