@@ -59,7 +59,7 @@ public class UI {
         }
     }
 
-    private void uiPostLogin(String[] args) {
+    private void uiPostLogin(String[] args) throws Exception {
         switch (args[0].toLowerCase()) {
             case "help":
                 System.out.println(
@@ -92,8 +92,9 @@ public class UI {
                 // TODO: observe
                 break;
             case "logout":
-                System.out.println("Logging out...");
-                // TODO: logout
+                facade.logout(auth.authToken());
+                auth = null;
+                break;
             default:
                 System.out.println("Invalid command. Type Help for a list of commands.");
                 break;

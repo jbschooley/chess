@@ -63,4 +63,12 @@ public class ServerFacade {
             return new Gson().fromJson(inputStreamReader, AuthData.class);
         }
     }
+
+    public void logout(String authToken) throws Exception {
+        URI uri = new URI(baseURI + "session");
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setRequestMethod("DELETE");
+        http.setRequestProperty("Authorization", authToken);
+        http.connect();
+    }
 }
