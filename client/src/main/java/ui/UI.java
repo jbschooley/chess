@@ -46,13 +46,12 @@ public class UI {
                 System.exit(0);
                 break;
             case "register":
-                System.out.println("Registering...");
                 auth = facade.register(args[1], args[2], args[3]);
                 System.out.println("Registered as " + auth.username());
                 break;
             case "login":
-                System.out.println("Logging in...");
-                // TODO: login
+                auth = facade.login(args[1], args[2]);
+                System.out.println("Logged in as " + auth.username());
                 break;
             default:
                 System.out.println("Invalid command. Type Help for a list of commands.");

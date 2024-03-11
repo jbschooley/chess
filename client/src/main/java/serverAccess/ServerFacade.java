@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Map;
 
 public class ServerFacade {
@@ -32,6 +30,7 @@ public class ServerFacade {
                 "password", password,
                 "email", email
         );
+
         try (var outputStream = http.getOutputStream()) {
             var jsonBody = new Gson().toJson(body);
             outputStream.write(jsonBody.getBytes());
@@ -42,5 +41,26 @@ public class ServerFacade {
             return new Gson().fromJson(inputStreamReader, AuthData.class);
         }
 
+    }
+
+    public AuthData login(String username, String password) throws Exception {
+        URI uri = new URI(baseURI + "session");
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setRequestMethod("POST");
+        http.setDoOutput(true);
+        Map<String, String> body = Map.of(
+                "username", username,
+                "password", password
+        );
+
+        try (var outputStream = http.getOutputStream()) {
+            var jsonBody = new Gson().toJson(body);
+            outputStream.write(jsonBody.getBytes());
+        }
+
+        try (InputStream respBody = http.getInputStream()) {
+            InputStreamReader inputStreamReader = new InputStreamReader(respBody);
+            return new Gson().fromJson(inputStreamReader, AuthData.class);
+        }
     }
 }
