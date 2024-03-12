@@ -1,13 +1,17 @@
 package ui;
 
 import model.AuthData;
+import model.GameData;
 import serverAccess.ServerFacade;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Scanner;
 
 public class UI {
     AuthData auth = null;
     ServerFacade facade;
+    Map<Integer, Integer> lastGames;
 
     public UI(ServerFacade facade) {
         this.facade = facade;
@@ -81,7 +85,7 @@ public class UI {
                 break;
             case "list":
                 System.out.println("Listing games...");
-                // TODO: list
+                listGames();
                 break;
             case "join":
                 System.out.println("Joining game...");
@@ -99,6 +103,14 @@ public class UI {
                 System.out.println("Invalid command. Type Help for a list of commands.");
                 break;
         }
+    }
+
+    private void listGames() throws Exception {
+        Collection<GameData> games = facade.listGames(auth.authToken());
+        for (GameData game : games) {
+            System.out.println(game);
+        }
+        // TODO save ids and numbers to lastGames
     }
 
     private static String helpLine(String command, String description) {

@@ -19,8 +19,8 @@ public class ServerFacadeTests {
     }
 
     @BeforeEach
-    public void clear() {
-        // Clear database
+    public void clear() throws Exception {
+        facade.clear();
     }
 
     @AfterAll
