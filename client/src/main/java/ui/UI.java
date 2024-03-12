@@ -80,8 +80,8 @@ public class UI {
                 System.exit(0);
                 break;
             case "create":
-                System.out.println("Creating game...");
-                // TODO: create
+                facade.createGame(auth.authToken(), args[1]);
+                System.out.println("Created game " + args[1]);
                 break;
             case "list":
                 System.out.println("Listing games...");
@@ -107,10 +107,24 @@ public class UI {
 
     private void listGames() throws Exception {
         Collection<GameData> games = facade.listGames(auth.authToken());
-        for (GameData game : games) {
-            System.out.println(game);
+        GameData[] gameArray = games.toArray(new GameData[0]);
+        Map<Integer, Integer> thisGames = new java.util.HashMap<>();
+        for (int i = 0; i < gameArray.length; i++) {
+            String gameString = String.format("%d: %s", gameArray[i].gameID(), gameArray[i].gameName());
+            if (gameArray[i].whiteUsername() != null) {
+                gameString += " (white: " + gameArray[i].whiteUsername() + ")";
+            }
+            if (gameArray[i].blackUsername() != null) {
+                gameString += " (black: " + gameArray[i].blackUsername() + ")";
+            }
+            System.out.println(gameString);
+            thisGames.put(i, gameArray[i].gameID());
         }
-        // TODO save ids and numbers to lastGames
+        lastGames = thisGames;
+    }
+
+    private void createGame(String name) throws Exception {
+
     }
 
     private static String helpLine(String command, String description) {

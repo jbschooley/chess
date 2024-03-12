@@ -77,7 +77,7 @@ public class SqlGameDAO implements GameDAO {
 
     public Collection<GameData> listGames() throws DataAccessException {
 
-        String statement = "SELECT * FROM game";
+        String statement = "SELECT * FROM game ORDER BY gameID";
         try (var conn = DatabaseManager.getConnection()) {
             try (var preparedStatement = conn.prepareStatement(statement)) {
                 var rs = preparedStatement.executeQuery();

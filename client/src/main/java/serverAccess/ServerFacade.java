@@ -96,4 +96,25 @@ public class ServerFacade {
             return gameList.games();
         }
     }
+
+    public GameData createGame(String authToken, String gameName) throws Exception {
+        URI uri = new URI(baseURI + "game");
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setRequestMethod("POST");
+        http.setDoOutput(true);
+        http.setRequestProperty("Authorization", authToken);
+        Map<String, String> body = Map.of(
+                "gameName", gameName
+        );
+
+        try (var outputStream = http.getOutputStream()) {
+            var jsonBody = new Gson().toJson(body);
+            outputStream.write(jsonBody.getBytes());
+        }
+
+        try (InputStream respBody = http.getInputStream()) {
+            InputStreamReader inputStreamReader = new InputStreamReader(respBody);
+            return new Gson().fromJson(inputStreamReader, GameData.class);
+        }
+    }
 }
