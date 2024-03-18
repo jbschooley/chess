@@ -84,16 +84,15 @@ public class UI {
                 System.out.println("Created game " + args[1]);
                 break;
             case "list":
-                System.out.println("Listing games...");
                 listGames();
                 break;
             case "join":
-                System.out.println("Joining game...");
-                // TODO: join
+                facade.joinGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])).toString(), args[2]);
+                System.out.println("Joined game " + args[1] + " as " + args[2] + " player");
                 break;
             case "observe":
-                System.out.println("Observing game...");
-                // TODO: observe
+                facade.observeGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])).toString());
+                System.out.println("Joined game " + args[1] + " as observer");
                 break;
             case "logout":
                 facade.logout(auth.authToken());
@@ -110,7 +109,7 @@ public class UI {
         GameData[] gameArray = games.toArray(new GameData[0]);
         Map<Integer, Integer> thisGames = new java.util.HashMap<>();
         for (int i = 0; i < gameArray.length; i++) {
-            String gameString = String.format("%d: %s", gameArray[i].gameID(), gameArray[i].gameName());
+            String gameString = String.format("%d: %s", i, gameArray[i].gameName());
             if (gameArray[i].whiteUsername() != null) {
                 gameString += " (white: " + gameArray[i].whiteUsername() + ")";
             }
@@ -121,10 +120,6 @@ public class UI {
             thisGames.put(i, gameArray[i].gameID());
         }
         lastGames = thisGames;
-    }
-
-    private void createGame(String name) throws Exception {
-
     }
 
     private static String helpLine(String command, String description) {

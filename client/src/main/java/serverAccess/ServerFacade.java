@@ -1,5 +1,6 @@
 package serverAccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
@@ -115,6 +116,49 @@ public class ServerFacade {
         try (InputStream respBody = http.getInputStream()) {
             InputStreamReader inputStreamReader = new InputStreamReader(respBody);
             return new Gson().fromJson(inputStreamReader, GameData.class);
+        }
+    }
+
+    public void joinGame(String authToken, String gameID, String color) throws Exception {
+        URI uri = new URI(baseURI + "game");
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setRequestMethod("PUT");
+        http.setDoOutput(true);
+        http.setRequestProperty("Authorization", authToken);
+        Map<String, String> body = Map.of(
+                "gameID", gameID,
+                "playerColor", color
+        );
+
+        try (var outputStream = http.getOutputStream()) {
+            var jsonBody = new Gson().toJson(body);
+            outputStream.write(jsonBody.getBytes());
+        }
+
+        try (InputStream respBody = http.getInputStream()) {
+            InputStreamReader inputStreamReader = new InputStreamReader(respBody);
+            String response = inputStreamReader.toString();
+        }
+    }
+
+    public void observeGame(String authToken, String gameID) throws Exception {
+        URI uri = new URI(baseURI + "game");
+        HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
+        http.setRequestMethod("PUT");
+        http.setDoOutput(true);
+        http.setRequestProperty("Authorization", authToken);
+        Map<String, String> body = Map.of(
+                "gameID", gameID
+        );
+
+        try (var outputStream = http.getOutputStream()) {
+            var jsonBody = new Gson().toJson(body);
+            outputStream.write(jsonBody.getBytes());
+        }
+
+        try (InputStream respBody = http.getInputStream()) {
+            InputStreamReader inputStreamReader = new InputStreamReader(respBody);
+            String response = inputStreamReader.toString();
         }
     }
 }
