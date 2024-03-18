@@ -30,6 +30,11 @@ public class ServerFacade {
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("DELETE");
         http.connect();
+
+        try (InputStream respBody = http.getInputStream()) {
+            InputStreamReader inputStreamReader = new InputStreamReader(respBody);
+            String response = inputStreamReader.toString();
+        }
     }
 
     public AuthData register(String username, String password, String email) throws Exception {
