@@ -104,4 +104,46 @@ public class ServerFacadeTests {
         Assertions.assertThrows(Exception.class, () -> facade.listGames("invalidtoken"));
     }
 
+    @Test
+    public void joinGame() {
+        // create game
+        GameData g = Assertions.assertDoesNotThrow(() -> facade.createGame(a.authToken(), "testgame"));
+
+        // join game
+        Assertions.assertDoesNotThrow(() -> facade.joinGame(a.authToken(), g.gameID(), "WHITE"));
+
+        // list games
+        Collection<GameData> games = Assertions.assertDoesNotThrow(() -> facade.listGames(a.authToken()));
+        Assertions.assertEquals(1, games.size());
+        GameData g1 = games.iterator().next();
+        Assertions.assertEquals(g1.whiteUsername(), username);
+    }
+
+    @Test
+    public void joinGameFailDuplicate() {
+        // create game
+        GameData g = Assertions.assertDoesNotThrow(() -> facade.createGame(a.authToken(), "testgame"));
+
+        // join game
+        Assertions.assertDoesNotThrow(() -> facade.joinGame(a.authToken(), g.gameID(), "BLACK"));
+
+        // join game again
+        Assertions.assertThrows(Exception.class, () -> facade.joinGame(a.authToken(), g.gameID(), "BLACK"));
+    }
+
+    @Test
+    public void observeGame() {
+        // create game
+        GameData g = Assertions.assertDoesNotThrow(() -> facade.createGame(a.authToken(), "testgame"));
+
+        // observe game
+        Assertions.assertDoesNotThrow(() -> facade.observeGame(a.authToken(), g.gameID()));
+    }
+
+    @Test
+    public void observeGameFailInvalid() {
+        // observe game
+        Assertions.assertThrows(Exception.class, () -> facade.observeGame(a.authToken(), -1));
+    }
+
 }

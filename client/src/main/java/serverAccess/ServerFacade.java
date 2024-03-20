@@ -125,14 +125,14 @@ public class ServerFacade {
         }
     }
 
-    public void joinGame(String authToken, String gameID, String color) throws Exception {
+    public void joinGame(String authToken, int gameID, String color) throws Exception {
         URI uri = new URI(baseURI + "game");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("PUT");
         http.setDoOutput(true);
         http.setRequestProperty("Authorization", authToken);
         Map<String, String> body = Map.of(
-                "gameID", gameID,
+                "gameID", String.valueOf(gameID),
                 "playerColor", color
         );
 
@@ -147,14 +147,14 @@ public class ServerFacade {
         }
     }
 
-    public void observeGame(String authToken, String gameID) throws Exception {
+    public void observeGame(String authToken, int gameID) throws Exception {
         URI uri = new URI(baseURI + "game");
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("PUT");
         http.setDoOutput(true);
         http.setRequestProperty("Authorization", authToken);
         Map<String, String> body = Map.of(
-                "gameID", gameID
+                "gameID", String.valueOf(gameID)
         );
 
         try (var outputStream = http.getOutputStream()) {

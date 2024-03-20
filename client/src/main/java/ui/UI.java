@@ -87,11 +87,11 @@ public class UI {
                 listGames();
                 break;
             case "join":
-                facade.joinGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])).toString(), args[2]);
+                facade.joinGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])), args[2]);
                 System.out.println("Joined game " + args[1] + " as " + args[2] + " player");
                 break;
             case "observe":
-                facade.observeGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])).toString());
+                facade.observeGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])));
                 System.out.println("Joined game " + args[1] + " as observer");
                 break;
             case "logout":
