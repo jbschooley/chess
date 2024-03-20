@@ -33,11 +33,11 @@ public class GameService {
         }
     }
 
-    public int createGame(String authToken, String name) throws UnauthorizedException {
+    public GameData createGame(String authToken, String name) throws UnauthorizedException {
         try {
             AuthData a = authDao.getAuth(authToken);
             GameData g = gameDao.createGame(name);
-            return g.gameID();
+            return g;
         } catch (DataAccessException e) {
             throw new UnauthorizedException();
         }

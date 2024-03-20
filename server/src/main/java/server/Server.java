@@ -145,8 +145,8 @@ public class Server {
             return badRequest(res);
         }
         try {
-            int gameID = gameService.createGame(authToken, cg.gameName());
-            return serializer.toJson(new CreateGameResponse(gameID));
+            GameData g = gameService.createGame(authToken, cg.gameName());
+            return serializer.toJson(g);
         } catch (UnauthorizedException e) {
             return unauthorizedError(res);
         }

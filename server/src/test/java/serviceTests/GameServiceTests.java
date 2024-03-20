@@ -98,9 +98,9 @@ public class GameServiceTests {
     public void getGame() throws TestException, UnauthorizedException {
         String name = "testgame";
 
-        int gameID = gameService.createGame(auth.authToken(), name);
-        GameData g = gameService.getGame(auth.authToken(), gameID);
-        Assertions.assertEquals(g.gameName(), name);
+        GameData g = gameService.createGame(auth.authToken(), name);
+        GameData g1 = gameService.getGame(auth.authToken(), g.gameID());
+        Assertions.assertEquals(g1.gameName(), name);
     }
 
     @Test
@@ -114,24 +114,24 @@ public class GameServiceTests {
     @DisplayName("Join Game as Player")
     public void joinGamePlayer() throws TestException, UnauthorizedException, AlreadyTakenException {
         String name = "testgame";
-        int gameID = gameService.createGame(auth.authToken(), name);
+        GameData g = gameService.createGame(auth.authToken(), name);
 
-        gameService.joinGamePlayer(auth.authToken(), gameID, ChessGame.TeamColor.WHITE);
-        GameData g = gameService.getGame(auth.authToken(), gameID);
-        Assertions.assertEquals(g.whiteUsername(), testUserUsername);
+        gameService.joinGamePlayer(auth.authToken(), g.gameID(), ChessGame.TeamColor.WHITE);
+        GameData g1 = gameService.getGame(auth.authToken(), g.gameID());
+        Assertions.assertEquals(g1.whiteUsername(), testUserUsername);
     }
 
     @Test
     @DisplayName("Join Game Already Taken")
     public void joinGamePlayerAlreadyTaken() throws TestException, UnauthorizedException, AlreadyTakenException {
         String name = "testgame";
-        int gameID = gameService.createGame(auth.authToken(), name);
+        GameData g = gameService.createGame(auth.authToken(), name);
 
         // join game
-        gameService.joinGamePlayer(auth.authToken(), gameID, ChessGame.TeamColor.WHITE);
+        gameService.joinGamePlayer(auth.authToken(), g.gameID(), ChessGame.TeamColor.WHITE);
 
         // join game again
-        Assertions.assertThrows(AlreadyTakenException.class, () -> gameService.joinGamePlayer(auth.authToken(), gameID, ChessGame.TeamColor.WHITE));
+        Assertions.assertThrows(AlreadyTakenException.class, () -> gameService.joinGamePlayer(auth.authToken(), g.gameID(), ChessGame.TeamColor.WHITE));
     }
 
 

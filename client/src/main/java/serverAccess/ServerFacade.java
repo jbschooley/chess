@@ -86,7 +86,8 @@ public class ServerFacade {
         HttpURLConnection http = (HttpURLConnection) uri.toURL().openConnection();
         http.setRequestMethod("DELETE");
         http.setRequestProperty("Authorization", authToken);
-        http.connect();
+
+        http.getInputStream();
     }
 
     public Collection<GameData> listGames(String authToken) throws Exception {
