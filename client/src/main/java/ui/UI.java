@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import serverAccess.ServerFacade;
@@ -7,6 +8,8 @@ import serverAccess.ServerFacade;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Scanner;
+
+import static ui.ChessBoard.drawBoard;
 
 public class UI {
     AuthData auth = null;
@@ -89,10 +92,14 @@ public class UI {
             case "join":
                 facade.joinGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])), args[2]);
                 System.out.println("Joined game " + args[1] + " as " + args[2] + " player");
+                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
+                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
                 break;
             case "observe":
                 facade.observeGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])));
                 System.out.println("Joined game " + args[1] + " as observer");
+                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
+                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
                 break;
             case "logout":
                 facade.logout(auth.authToken());
