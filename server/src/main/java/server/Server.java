@@ -59,6 +59,8 @@ public class Server {
             throw new RuntimeException(e);
         }
 
+        Spark.webSocket("/connect", WSServer.class);
+
         // Register your endpoints and handle exceptions here.
         Spark.delete("/db", this::clearHandler);
         Spark.post("/user", this::registerHandler);
