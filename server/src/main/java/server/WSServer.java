@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataAccess.*;
 import exceptions.AlreadyTakenException;
 import exceptions.UnauthorizedException;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.*;
@@ -112,6 +113,9 @@ public class WSServer {
     void joinPlayerHandler(Session session, JoinPlayer command) throws IOException {
         try {
 
+            // get auth data
+            AuthData a = userService.getAuth(command.getAuthString());
+
             // get game data
             GameData g = gameService.getGame(command.getAuthString(), command.gameID);
 
@@ -120,27 +124,17 @@ public class WSServer {
             if (usernameToCheck == null) {
                 new Error("Error: team empty").send(session);
                 return;
+            } else if (!usernameToCheck.equals(a.username())) {
+                new Error("Error: wrong team").send(session);
+                return;
             }
 
-            switch (command.playerColor) {
-                case WHITE -> {
-                    gameService.joinGamePlayer(command.getAuthString(), command.gameID, ChessGame.TeamColor.WHITE);
-                    System.out.println("Joined game as white");
-                    sendLoadGame(session, command.getAuthString(), command.gameID);
-                }
-                case BLACK -> {
-                    gameService.joinGamePlayer(command.getAuthString(), command.gameID, ChessGame.TeamColor.BLACK);
-                    System.out.println("Joined game as black");
-                    sendLoadGame(session, command.getAuthString(), command.gameID);
-                }
-                default -> {
-                    new Error("Error: invalid player color").send(session);
-                }
-            }
+            sendLoadGame(session, command.getAuthString(), command.gameID);
+
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
-        } catch (AlreadyTakenException e) {
-            new Error("Error: wrong team").send(session);
+        } catch (DataAccessException e) {
+            new Error("Error: data access").send(session);
         }
     }
 

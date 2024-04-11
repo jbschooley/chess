@@ -39,6 +39,10 @@ public class UserService {
         }
     }
 
+    public AuthData getAuth(String authToken) throws DataAccessException {
+        return authDao.getAuth(authToken);
+    }
+
     public void logout(String authToken) throws DataAccessException {
         authDao.deleteAuth(authToken);
     }
