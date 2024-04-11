@@ -177,6 +177,9 @@ public class WSServer {
     void joinObserverHandler(Session session, JoinObserver command) throws IOException {
         try {
             GameData g = gameService.getGame(command.getAuthString(), command.gameID);
+            addClientToGame(command.gameID, session);
+            sendLoadGame(session, command.getAuthString(), command.gameID);
+            sendToGameClients(command.gameID, new Notification("Observer joined"), session);
             System.out.println("Joined game as observer");
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
