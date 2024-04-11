@@ -51,7 +51,7 @@ public class WSServer {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session user, String message) throws IOException {
+    public void onMessage(Session session, String message) throws IOException {
         System.out.println("Message received: " + message);
 
         UserGameCommandRaw rc = gson.fromJson(message, UserGameCommandRaw.class);
@@ -76,15 +76,15 @@ public class WSServer {
         // Check auth token
         if (c.getAuthString() == null) {
             System.out.println("No auth token provided");
-            new Error("Error: no auth token provided").send(user);
+            new Error("Error: no auth token provided").send(session);
             return;
         }
 
         // Handle the command
         try {
             switch (c.getCommandType()) {
-                case JOIN_PLAYER -> joinPlayerHandler(user, (JoinPlayer) c);
-                case JOIN_OBSERVER -> joinObserverHandler(user, (JoinObserver) c);
+                case JOIN_PLAYER -> joinPlayerHandler(session, (JoinPlayer) c);
+                case JOIN_OBSERVER -> joinObserverHandler(session, (JoinObserver) c);
                 case MAKE_MOVE -> System.out.println("Make move");
                 case LEAVE -> System.out.println("Leave");
                 case RESIGN -> System.out.println("Resign");
@@ -96,12 +96,12 @@ public class WSServer {
         }
     }
 
-    void sendLoadGame(Session user, String authToken, int gameID) throws IOException {
+    void sendLoadGame(Session session, String authToken, int gameID) throws IOException {
         System.out.println("Sending game data");
         try {
             GameData g = gameService.getGame(authToken, gameID);
             System.out.println("Game data: " + g);
-            new LoadGame(g.game()).send(user);
+            new LoadGame(g.game()).send(session);
             // TODO send to all other clients in game
         } catch (UnauthorizedException e) {
             System.out.println("Error sending game data: " + e.getMessage());
@@ -109,36 +109,47 @@ public class WSServer {
         }
     }
 
-    void joinPlayerHandler(Session user, JoinPlayer command) throws IOException {
+    void joinPlayerHandler(Session session, JoinPlayer command) throws IOException {
         try {
+
+            // get game data
+            GameData g = gameService.getGame(command.getAuthString(), command.gameID);
+
+            // check player already joined
+            String usernameToCheck = command.playerColor == ChessGame.TeamColor.WHITE ? g.whiteUsername() : g.blackUsername();
+            if (usernameToCheck == null) {
+                new Error("Error: team empty").send(session);
+                return;
+            }
+
             switch (command.playerColor) {
                 case WHITE -> {
                     gameService.joinGamePlayer(command.getAuthString(), command.gameID, ChessGame.TeamColor.WHITE);
                     System.out.println("Joined game as white");
-                    sendLoadGame(user, command.getAuthString(), command.gameID);
+                    sendLoadGame(session, command.getAuthString(), command.gameID);
                 }
                 case BLACK -> {
                     gameService.joinGamePlayer(command.getAuthString(), command.gameID, ChessGame.TeamColor.BLACK);
                     System.out.println("Joined game as black");
-                    sendLoadGame(user, command.getAuthString(), command.gameID);
+                    sendLoadGame(session, command.getAuthString(), command.gameID);
                 }
                 default -> {
-                    new Error("Error: invalid player color").send(user);
+                    new Error("Error: invalid player color").send(session);
                 }
             }
         } catch (UnauthorizedException e) {
-            new Error("Error: unauthorized").send(user);
+            new Error("Error: unauthorized").send(session);
         } catch (AlreadyTakenException e) {
-            new Error("Error: already taken").send(user);
+            new Error("Error: wrong team").send(session);
         }
     }
 
-    void joinObserverHandler(Session user, JoinObserver command) throws IOException {
+    void joinObserverHandler(Session session, JoinObserver command) throws IOException {
         try {
             GameData g = gameService.getGame(command.getAuthString(), command.gameID);
             System.out.println("Joined game as observer");
         } catch (UnauthorizedException e) {
-            new Error("Error: unauthorized").send(user);
+            new Error("Error: unauthorized").send(session);
         }
     }
 }
