@@ -2,7 +2,6 @@ package server;
 
 import chess.ChessGame;
 import dataAccess.*;
-import exceptions.AlreadyTakenException;
 import exceptions.UnauthorizedException;
 import model.AuthData;
 import model.GameData;
@@ -92,7 +91,7 @@ public class WSServer {
                 case JOIN_PLAYER -> joinPlayerHandler(session, (JoinPlayer) c);
                 case JOIN_OBSERVER -> joinObserverHandler(session, (JoinObserver) c);
                 case MAKE_MOVE -> System.out.println("Make move");
-                case LEAVE -> System.out.println("Leave");
+                case LEAVE -> leaveHandler(session, (Leave) c);
                 case RESIGN -> System.out.println("Resign");
                 default -> System.out.println("Unknown command type: " + c.getCommandType());
             }
@@ -181,6 +180,19 @@ public class WSServer {
             sendLoadGame(session, command.getAuthString(), command.gameID);
             sendToGameClients(command.gameID, new Notification("Observer joined"), session);
             System.out.println("Joined game as observer");
+        } catch (UnauthorizedException e) {
+            new Error("Error: unauthorized").send(session);
+        }
+    }
+
+    void leaveHandler(Session session, Leave command) throws IOException {
+        try {
+            gameService.leaveGamePlayer(command.getAuthString(), command.gameID);
+            // remove from game sessions
+            ArrayList<Session> sessions = gameSessions.get(command.gameID);
+            if (sessions != null) sessions.remove(session);
+            sendToGameClients(command.gameID, new Notification("Player left game"), session);
+            System.out.println("User left game");
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
         }

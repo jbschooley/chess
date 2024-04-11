@@ -65,4 +65,18 @@ public class GameService {
             throw new UnauthorizedException();
         }
     }
+
+    public void leaveGamePlayer(String authToken, int gameID) throws UnauthorizedException {
+        try {
+            AuthData a = authDao.getAuth(authToken);
+            GameData g = gameDao.getGame(gameID);
+            if (a.username().equals(g.whiteUsername())) {
+                gameDao.updateGameUsername(gameID, ChessGame.TeamColor.WHITE, null);
+            } else if (a.username().equals(g.blackUsername())) {
+                gameDao.updateGameUsername(gameID, ChessGame.TeamColor.BLACK, null);
+            }
+        } catch (DataAccessException e) {
+            throw new UnauthorizedException();
+        }
+    }
 }
