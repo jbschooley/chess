@@ -1,8 +1,10 @@
 package webSocketMessages.serverMessages;
 
-import chess.ChessGame;
+import com.google.gson.annotations.Expose;
 
 public class Error extends ServerMessage {
+
+    @Expose
     private final String errorMessage;
 
     public Error(String errorMessage) {
