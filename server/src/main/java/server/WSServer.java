@@ -14,10 +14,12 @@ import service.UserService;
 import com.google.gson.Gson;
 import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
+import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
-
 import java.io.IOException;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 record UserGameCommandRaw(String authToken, String commandType) {}
 
@@ -35,6 +37,9 @@ public class WSServer {
     ClearService clearService;
     UserService userService;
     GameService gameService;
+
+    // List of game clients per game
+    HashMap<Integer, ArrayList<Session>> gameSessions = new HashMap<>();
 
     public WSServer() {
         // Initialize DAOs and services
@@ -110,6 +115,33 @@ public class WSServer {
         }
     }
 
+    void addClientToGame(int gameID, Session session) {
+        if (!gameSessions.containsKey(gameID)) {
+            ArrayList<Session> sessions = new ArrayList<>();
+            sessions.add(session);
+            gameSessions.put(gameID, sessions);
+        } else {
+            gameSessions.get(gameID).add(session);
+        }
+    }
+
+    void sendToGameClients(int gameID, ServerMessage message, Session excludeSession) {
+        ArrayList<Session> sessions = gameSessions.get(gameID);
+        if (sessions != null) {
+            for (Session s : sessions) {
+                if (s == excludeSession) {
+                    continue;
+                }
+                try {
+                    message.send(s);
+                } catch (IOException e) {
+                    System.out.println("Error sending message to client: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     void joinPlayerHandler(Session session, JoinPlayer command) throws IOException {
         try {
 
@@ -129,7 +161,11 @@ public class WSServer {
                 return;
             }
 
+            addClientToGame(command.gameID, session);
             sendLoadGame(session, command.getAuthString(), command.gameID);
+
+            String color = command.playerColor == ChessGame.TeamColor.WHITE ? "white" : "black";
+            sendToGameClients(command.gameID, new Notification("Player joined as " + color), session);
 
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
