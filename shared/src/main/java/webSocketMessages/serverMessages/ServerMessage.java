@@ -17,6 +17,9 @@ import java.util.Objects;
  * methods.
  */
 public class ServerMessage {
+
+    // exclude java.lang.ThreadLocal, TRACE_VTHREAD_LOCALS from serialization
+//    Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).create();
     Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     @Expose

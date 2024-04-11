@@ -1,5 +1,7 @@
 package chess;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.Arrays;
 
 /**
@@ -22,6 +24,7 @@ public class ChessBoard {
         return Arrays.deepHashCode(board);
     }
 
+    @Expose
     private ChessPiece[][] board;
 
     public ChessBoard() {

@@ -56,8 +56,8 @@ public class GameService {
         try {
             AuthData a = authDao.getAuth(authToken);
             GameData g = gameDao.getGame(gameID);
-            if ((playerColor == ChessGame.TeamColor.WHITE && g.whiteUsername() != null) ||
-                    (playerColor == ChessGame.TeamColor.BLACK && g.blackUsername() != null)) {
+            if ((playerColor == ChessGame.TeamColor.WHITE && g.whiteUsername() != null && !g.whiteUsername().equals(a.username())) ||
+                    (playerColor == ChessGame.TeamColor.BLACK && g.blackUsername() != null && !g.blackUsername().equals(a.username()))) {
                 throw new AlreadyTakenException();
             }
             g = gameDao.updateGameUsername(gameID, playerColor, a.username());

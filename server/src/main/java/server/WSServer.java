@@ -12,6 +12,7 @@ import service.GameService;
 import service.UserService;
 import com.google.gson.Gson;
 import webSocketMessages.serverMessages.Error;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.userCommands.*;
 
 import java.io.IOException;
@@ -95,16 +96,31 @@ public class WSServer {
         }
     }
 
+    void sendLoadGame(Session user, String authToken, int gameID) throws IOException {
+        System.out.println("Sending game data");
+        try {
+            GameData g = gameService.getGame(authToken, gameID);
+            System.out.println("Game data: " + g);
+            new LoadGame(g.game()).send(user);
+            // TODO send to all other clients in game
+        } catch (UnauthorizedException e) {
+            System.out.println("Error sending game data: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     void joinPlayerHandler(Session user, JoinPlayer command) throws IOException {
         try {
             switch (command.playerColor) {
                 case WHITE -> {
                     gameService.joinGamePlayer(command.getAuthString(), command.gameID, ChessGame.TeamColor.WHITE);
                     System.out.println("Joined game as white");
+                    sendLoadGame(user, command.getAuthString(), command.gameID);
                 }
                 case BLACK -> {
                     gameService.joinGamePlayer(command.getAuthString(), command.gameID, ChessGame.TeamColor.BLACK);
                     System.out.println("Joined game as black");
+                    sendLoadGame(user, command.getAuthString(), command.gameID);
                 }
                 default -> {
                     new Error("Error: invalid player color").send(user);
