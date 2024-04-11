@@ -4,12 +4,12 @@ import chess.ChessGame;
 import dataAccess.*;
 import exceptions.AlreadyTakenException;
 import exceptions.UnauthorizedException;
+import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.*;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
-import spark.Spark;
 import com.google.gson.Gson;
 import webSocketMessages.serverMessages.Error;
 import webSocketMessages.userCommands.*;
@@ -50,7 +50,7 @@ public class WSServer {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session user, String message)  {
+    public void onMessage(Session user, String message) throws IOException {
         System.out.println("Message received: " + message);
 
         UserGameCommandRaw rc = gson.fromJson(message, UserGameCommandRaw.class);
@@ -64,16 +64,26 @@ public class WSServer {
             case "MAKE_MOVE" -> c = gson.fromJson(message, MakeMove.class);
             case "LEAVE" -> c = gson.fromJson(message, Leave.class);
             case "RESIGN" -> c = gson.fromJson(message, Resign.class);
-            default -> System.out.println("Unknown command type: " + rc.commandType());
+            default -> {
+                System.out.println("Unknown command type: " + rc.commandType());
+                return;
+            }
         }
 
         System.out.println("Command: " + c);
 
+        // Check auth token
+        if (c.getAuthString() == null) {
+            System.out.println("No auth token provided");
+            new Error("Error: no auth token provided").send(user);
+            return;
+        }
+
         // Handle the command
         try {
-            switch (Objects.requireNonNull(c).getCommandType()) {
-                case JOIN_PLAYER -> joinGameHandler(user, (JoinPlayer) c);
-                case JOIN_OBSERVER -> System.out.println("Join observer");
+            switch (c.getCommandType()) {
+                case JOIN_PLAYER -> joinPlayerHandler(user, (JoinPlayer) c);
+                case JOIN_OBSERVER -> joinObserverHandler(user, (JoinObserver) c);
                 case MAKE_MOVE -> System.out.println("Make move");
                 case LEAVE -> System.out.println("Leave");
                 case RESIGN -> System.out.println("Resign");
@@ -85,11 +95,7 @@ public class WSServer {
         }
     }
 
-    void joinGameHandler(Session user, JoinPlayer command) throws IOException {
-        if (command.getAuthString() == null) {
-            System.out.println("No auth token provided");
-            return;
-        }
+    void joinPlayerHandler(Session user, JoinPlayer command) throws IOException {
         try {
             switch (command.playerColor) {
                 case WHITE -> {
@@ -108,6 +114,15 @@ public class WSServer {
             new Error("Error: unauthorized").send(user);
         } catch (AlreadyTakenException e) {
             new Error("Error: already taken").send(user);
+        }
+    }
+
+    void joinObserverHandler(Session user, JoinObserver command) throws IOException {
+        try {
+            GameData g = gameService.getGame(command.getAuthString(), command.gameID);
+            System.out.println("Joined game as observer");
+        } catch (UnauthorizedException e) {
+            new Error("Error: unauthorized").send(user);
         }
     }
 }
