@@ -13,14 +13,19 @@ import java.util.Objects;
  * signature of the existing methods.
  */
 public class ChessGame {
+
     @Expose
     TeamColor teamTurn;
+
+    @Expose
+    boolean gameEnded;
 
     @Expose
     ChessBoard board;
 
     public ChessGame() {
         teamTurn = TeamColor.WHITE;
+        gameEnded = false;
         board = new ChessBoard();
         board.resetBoard();
     }
@@ -216,6 +221,10 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    public void setGameEnded(boolean gameEnded) {
+        this.gameEnded = gameEnded;
     }
 
     @Override

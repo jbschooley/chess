@@ -79,4 +79,15 @@ public class GameService {
             throw new UnauthorizedException();
         }
     }
+
+    public void resignGame(String authToken, int gameID) throws UnauthorizedException {
+        try {
+            AuthData a = authDao.getAuth(authToken);
+            GameData g = gameDao.getGame(gameID);
+            g.game().setGameEnded(true);
+            gameDao.updateGameData(gameID, g.game());
+        } catch (DataAccessException e) {
+            throw new UnauthorizedException();
+        }
+    }
 }

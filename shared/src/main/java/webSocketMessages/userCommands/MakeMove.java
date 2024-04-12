@@ -4,8 +4,8 @@ import chess.ChessGame;
 import chess.ChessMove;
 
 public class MakeMove extends UserGameCommand {
-    private final int gameID;
-    private final ChessMove move;
+    public final int gameID;
+    public final ChessMove move;
 
     public MakeMove(String authToken, int gameID, ChessMove move) {
         super(authToken);

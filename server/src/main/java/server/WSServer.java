@@ -85,14 +85,23 @@ public class WSServer {
             return;
         }
 
+        // get auth data
+        AuthData a = null;
+        try {
+            a = userService.getAuth(c.getAuthString());
+        } catch (UnauthorizedException e) {
+            new Error("Error: invalid auth token").send(session);
+            return;
+        }
+
         // Handle the command
         try {
             switch (c.getCommandType()) {
-                case JOIN_PLAYER -> joinPlayerHandler(session, (JoinPlayer) c);
-                case JOIN_OBSERVER -> joinObserverHandler(session, (JoinObserver) c);
+                case JOIN_PLAYER -> joinPlayerHandler(session, a, (JoinPlayer) c);
+                case JOIN_OBSERVER -> joinObserverHandler(session, a, (JoinObserver) c);
                 case MAKE_MOVE -> System.out.println("Make move");
-                case LEAVE -> leaveHandler(session, (Leave) c);
-                case RESIGN -> System.out.println("Resign");
+                case LEAVE -> leaveHandler(session, a, (Leave) c);
+                case RESIGN -> resignHandler(session, a, (Resign) c);
                 default -> System.out.println("Unknown command type: " + c.getCommandType());
             }
         } catch (IOException e) {
@@ -127,6 +136,7 @@ public class WSServer {
     void sendToGameClients(int gameID, ServerMessage message, Session excludeSession) {
         ArrayList<Session> sessions = gameSessions.get(gameID);
         if (sessions != null) {
+            System.out.println("Game clients: " + sessions.size());
             for (Session s : sessions) {
                 if (s == excludeSession) {
                     continue;
@@ -141,11 +151,8 @@ public class WSServer {
         }
     }
 
-    void joinPlayerHandler(Session session, JoinPlayer command) throws IOException {
+    void joinPlayerHandler(Session session, AuthData a, JoinPlayer command) throws IOException {
         try {
-
-            // get auth data
-            AuthData a = userService.getAuth(command.getAuthString());
 
             // get game data
             GameData g = gameService.getGame(command.getAuthString(), command.gameID);
@@ -164,35 +171,43 @@ public class WSServer {
             sendLoadGame(session, command.getAuthString(), command.gameID);
 
             String color = command.playerColor == ChessGame.TeamColor.WHITE ? "white" : "black";
-            sendToGameClients(command.gameID, new Notification("Player joined as " + color), session);
+            sendToGameClients(command.gameID, new Notification(a.username() + " joined as " + color), session);
 
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
-        } catch (DataAccessException e) {
-            new Error("Error: data access").send(session);
         }
     }
 
-    void joinObserverHandler(Session session, JoinObserver command) throws IOException {
+    void joinObserverHandler(Session session, AuthData a, JoinObserver command) throws IOException {
         try {
             GameData g = gameService.getGame(command.getAuthString(), command.gameID);
             addClientToGame(command.gameID, session);
             sendLoadGame(session, command.getAuthString(), command.gameID);
-            sendToGameClients(command.gameID, new Notification("Observer joined"), session);
+            sendToGameClients(command.gameID, new Notification(a.username() + " joined as observer"), session);
             System.out.println("Joined game as observer");
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
         }
     }
 
-    void leaveHandler(Session session, Leave command) throws IOException {
+    void leaveHandler(Session session, AuthData a, Leave command) throws IOException {
         try {
             gameService.leaveGamePlayer(command.getAuthString(), command.gameID);
             // remove from game sessions
             ArrayList<Session> sessions = gameSessions.get(command.gameID);
             if (sessions != null) sessions.remove(session);
-            sendToGameClients(command.gameID, new Notification("Player left game"), session);
+            sendToGameClients(command.gameID, new Notification(a.username() + " left the game"), null);
             System.out.println("User left game");
+        } catch (UnauthorizedException e) {
+            new Error("Error: unauthorized").send(session);
+        }
+    }
+
+    void resignHandler(Session session, AuthData a, Resign command) throws IOException {
+        try {
+            gameService.resignGame(command.getAuthString(), command.gameID);
+            sendToGameClients(command.gameID, new Notification(a.username() + " resigned"), null);
+            System.out.println("User resigned game");
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
         }

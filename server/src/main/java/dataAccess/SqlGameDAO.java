@@ -120,4 +120,20 @@ public class SqlGameDAO implements GameDAO {
 
         return getGame(id);
     }
+
+    public GameData updateGameData(int id, ChessGame game) throws DataAccessException {
+        String statement = "UPDATE game SET game = ? WHERE gameID = ?;";
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var preparedStatement = conn.prepareStatement(statement)) {
+                preparedStatement.setString(1, serializer.toJson(game));
+                preparedStatement.setInt(2, id);
+                var rs = preparedStatement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DataAccessException("SQL error");
+        }
+
+        return getGame(id);
+    }
 }
