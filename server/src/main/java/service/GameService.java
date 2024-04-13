@@ -72,6 +72,12 @@ public class GameService {
         try {
             AuthData a = authDao.getAuth(authToken);
             GameData g = gameDao.getGame(gameID);
+            // check if player is on correct team
+            ChessGame.TeamColor pieceColor = g.game().getBoard().getPiece(move.getStartPosition()).getTeamColor();
+            if ((pieceColor == ChessGame.TeamColor.WHITE && !a.username().equals(g.whiteUsername())) ||
+                    (pieceColor == ChessGame.TeamColor.BLACK && !a.username().equals(g.blackUsername()))) {
+                throw new UnauthorizedException();
+            }
             g.game().makeMove(move);
             gameDao.updateGameData(gameID, g.game());
             return g;
