@@ -1,6 +1,8 @@
 package service;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import dataAccess.AuthDAO;
 import dataAccess.DataAccessException;
 import dataAccess.GameDAO;
@@ -61,6 +63,18 @@ public class GameService {
                 throw new AlreadyTakenException();
             }
             g = gameDao.updateGameUsername(gameID, playerColor, a.username());
+        } catch (DataAccessException e) {
+            throw new UnauthorizedException();
+        }
+    }
+
+    public GameData makeMove(String authToken, int gameID, ChessMove move) throws UnauthorizedException, InvalidMoveException {
+        try {
+            AuthData a = authDao.getAuth(authToken);
+            GameData g = gameDao.getGame(gameID);
+            g.game().makeMove(move);
+            gameDao.updateGameData(gameID, g.game());
+            return g;
         } catch (DataAccessException e) {
             throw new UnauthorizedException();
         }

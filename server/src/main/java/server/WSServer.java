@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import dataAccess.*;
 import exceptions.UnauthorizedException;
 import model.AuthData;
@@ -99,7 +100,7 @@ public class WSServer {
             switch (c.getCommandType()) {
                 case JOIN_PLAYER -> joinPlayerHandler(session, a, (JoinPlayer) c);
                 case JOIN_OBSERVER -> joinObserverHandler(session, a, (JoinObserver) c);
-                case MAKE_MOVE -> System.out.println("Make move");
+                case MAKE_MOVE -> makeMoveHandler(session, a, (MakeMove) c);
                 case LEAVE -> leaveHandler(session, a, (Leave) c);
                 case RESIGN -> resignHandler(session, a, (Resign) c);
                 default -> System.out.println("Unknown command type: " + c.getCommandType());
@@ -122,6 +123,19 @@ public class WSServer {
             e.printStackTrace();
         }
     }
+
+//    void getLoadGame(Session session, String authToken, int gameID) throws IOException {
+//        System.out.println("Getting game data");
+//        try {
+//            GameData g = gameService.getGame(authToken, gameID);
+//            System.out.println("Game data: " + g);
+//            return new LoadGame(g.game()).send(session);
+//            // TODO send to all other clients in game
+//        } catch (UnauthorizedException e) {
+//            System.out.println("Error sending game data: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//    }
 
     void addClientToGame(int gameID, Session session) {
         if (!gameSessions.containsKey(gameID)) {
@@ -187,6 +201,19 @@ public class WSServer {
             System.out.println("Joined game as observer");
         } catch (UnauthorizedException e) {
             new Error("Error: unauthorized").send(session);
+        }
+    }
+
+    void makeMoveHandler(Session session, AuthData a, MakeMove command) throws IOException {
+        try {
+            GameData g = gameService.makeMove(command.getAuthString(), command.gameID, command.move);
+            sendToGameClients(command.gameID, new LoadGame(g.game()), null);
+            sendToGameClients(command.gameID, new Notification(a.username() + " made a move: " + command.move), session);
+            System.out.println("User made move");
+        } catch (UnauthorizedException e) {
+            new Error("Error: unauthorized").send(session);
+        } catch (InvalidMoveException e) {
+            new Error("Error: invalid move").send(session);
         }
     }
 
