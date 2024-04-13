@@ -231,6 +231,10 @@ public class ChessGame {
         this.gameEnded = gameEnded;
     }
 
+    public boolean getGameEnded() {
+        return gameEnded;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

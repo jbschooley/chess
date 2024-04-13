@@ -104,6 +104,17 @@ public class GameService {
         try {
             AuthData a = authDao.getAuth(authToken);
             GameData g = gameDao.getGame(gameID);
+
+            // if game has already ended, throw exception
+            if (g.game().getGameEnded()) {
+                throw new UnauthorizedException();
+            }
+
+            // check that player is on a team
+            if (!a.username().equals(g.whiteUsername()) && !a.username().equals(g.blackUsername())) {
+                throw new UnauthorizedException();
+            }
+
             g.game().setGameEnded(true);
             gameDao.updateGameData(gameID, g.game());
         } catch (DataAccessException e) {
