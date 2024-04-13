@@ -44,12 +44,12 @@ public class WSServer {
     public WSServer() {
         // Initialize DAOs and services
         try {
+            gameDao = new SqlGameDAO();
             userDao = new SqlUserDAO();
             authDao = new SqlAuthDAO();
-            gameDao = new SqlGameDAO();
 
-            clearService = new ClearService(gameDao, authDao, userDao);
             userService = new UserService(authDao, userDao);
+            clearService = new ClearService(gameDao, authDao, userDao);
             gameService = new GameService(authDao, userDao, gameDao);
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
