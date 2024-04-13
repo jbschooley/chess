@@ -3,9 +3,7 @@ package webSocketMessages.serverMessages;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import org.eclipse.jetty.websocket.api.*;
 
-import java.io.IOException;
 import java.util.Objects;
 
 /**
@@ -35,10 +33,8 @@ public class ServerMessage {
         return this.serverMessageType;
     }
 
-    public void send(Session session) throws IOException {
-        System.out.println("Sending message");
-        System.out.println("Converting to JSON: " + gson.toJson(this));
-        session.getRemote().sendString(gson.toJson(this));
+    public String toJson() {
+        return gson.toJson(this);
     }
 
     @Override

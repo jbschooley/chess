@@ -82,7 +82,7 @@ public class WSServer {
         // Check auth token
         if (c.getAuthString() == null) {
             System.out.println("No auth token provided");
-            new Error("Error: no auth token provided").send(session);
+            send(session, new Error("Error: no auth token provided"));
             return;
         }
 
@@ -91,7 +91,7 @@ public class WSServer {
         try {
             a = userService.getAuth(c.getAuthString());
         } catch (UnauthorizedException e) {
-            new Error("Error: invalid auth token").send(session);
+            send(session, new Error("Error: invalid auth token"));
             return;
         }
 
@@ -111,31 +111,23 @@ public class WSServer {
         }
     }
 
+    void send(Session session, ServerMessage message) throws IOException {
+        System.out.println("Sending message");
+//        System.out.println("Converting to JSON: " + message.toJson());
+        session.getRemote().sendString(message.toJson());
+    }
+
     void sendLoadGame(Session session, String authToken, int gameID) throws IOException {
         System.out.println("Sending game data");
         try {
             GameData g = gameService.getGame(authToken, gameID);
             System.out.println("Game data: " + g);
-            new LoadGame(g.game()).send(session);
-            // TODO send to all other clients in game
+            send(session, new LoadGame(g.game()));
         } catch (UnauthorizedException e) {
             System.out.println("Error sending game data: " + e.getMessage());
             e.printStackTrace();
         }
     }
-
-//    void getLoadGame(Session session, String authToken, int gameID) throws IOException {
-//        System.out.println("Getting game data");
-//        try {
-//            GameData g = gameService.getGame(authToken, gameID);
-//            System.out.println("Game data: " + g);
-//            return new LoadGame(g.game()).send(session);
-//            // TODO send to all other clients in game
-//        } catch (UnauthorizedException e) {
-//            System.out.println("Error sending game data: " + e.getMessage());
-//            e.printStackTrace();
-//        }
-//    }
 
     void addClientToGame(int gameID, Session session) {
         if (!gameSessions.containsKey(gameID)) {
@@ -156,7 +148,7 @@ public class WSServer {
                     continue;
                 }
                 try {
-                    message.send(s);
+                    send(s, message);
                 } catch (IOException e) {
                     System.out.println("Error sending message to client: " + e.getMessage());
                     e.printStackTrace();
@@ -174,10 +166,10 @@ public class WSServer {
             // check player already joined
             String usernameToCheck = command.playerColor == ChessGame.TeamColor.WHITE ? g.whiteUsername() : g.blackUsername();
             if (usernameToCheck == null) {
-                new Error("Error: team empty").send(session);
+                send(session, new Error("Error: team empty"));
                 return;
             } else if (!usernameToCheck.equals(a.username())) {
-                new Error("Error: wrong team").send(session);
+                send(session, new Error("Error: wrong team"));
                 return;
             }
 
@@ -188,7 +180,7 @@ public class WSServer {
             sendToGameClients(command.gameID, new Notification(a.username() + " joined as " + color), session);
 
         } catch (UnauthorizedException e) {
-            new Error("Error: unauthorized").send(session);
+            send(session, new Error("Error: unauthorized"));
         }
     }
 
@@ -200,7 +192,7 @@ public class WSServer {
             sendToGameClients(command.gameID, new Notification(a.username() + " joined as observer"), session);
             System.out.println("Joined game as observer");
         } catch (UnauthorizedException e) {
-            new Error("Error: unauthorized").send(session);
+            send(session, new Error("Error: unauthorized"));
         }
     }
 
@@ -211,9 +203,9 @@ public class WSServer {
             sendToGameClients(command.gameID, new Notification(a.username() + " made a move: " + command.move), session);
             System.out.println("User made move");
         } catch (UnauthorizedException e) {
-            new Error("Error: unauthorized").send(session);
+            send(session, new Error("Error: unauthorized"));
         } catch (InvalidMoveException e) {
-            new Error("Error: invalid move").send(session);
+            send(session, new Error("Error: invalid move"));
         }
     }
 
@@ -226,7 +218,7 @@ public class WSServer {
             sendToGameClients(command.gameID, new Notification(a.username() + " left the game"), null);
             System.out.println("User left game");
         } catch (UnauthorizedException e) {
-            new Error("Error: unauthorized").send(session);
+            send(session, new Error("Error: unauthorized"));
         }
     }
 
@@ -236,7 +228,7 @@ public class WSServer {
             sendToGameClients(command.gameID, new Notification(a.username() + " resigned"), null);
             System.out.println("User resigned game");
         } catch (UnauthorizedException e) {
-            new Error("Error: unauthorized").send(session);
+            send(session, new Error("Error: unauthorized"));
         }
     }
 }
