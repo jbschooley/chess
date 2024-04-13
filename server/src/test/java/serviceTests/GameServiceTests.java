@@ -4,6 +4,7 @@ import chess.ChessGame;
 import dataAccess.*;
 import exceptions.AlreadyTakenException;
 import exceptions.UnauthorizedException;
+import exceptions.UserAlreadyTakenException;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -32,7 +33,7 @@ public class GameServiceTests {
     AuthData auth;
 
     @BeforeEach
-    public void setup() throws TestException, DataAccessException, UnauthorizedException {
+    public void setup() throws TestException, DataAccessException, UnauthorizedException, UserAlreadyTakenException {
         // Initialize DAOs and services
         try {
             userDao = new SqlUserDAO();
@@ -50,7 +51,7 @@ public class GameServiceTests {
 
         // create test user
         UserData u = new UserData(testUserUsername, testUserPassword, testUserEmail);
-        userDao.createUser(u);
+        userService.register(u);
 
         // login
         auth = userService.login(testUserUsername, testUserPassword);
@@ -130,8 +131,12 @@ public class GameServiceTests {
         // join game
         gameService.joinGamePlayer(auth.authToken(), g.gameID(), ChessGame.TeamColor.WHITE);
 
+        // register another user
+        UserData u = new UserData("testuser2", "testpass", "a@b.c");
+        AuthData a2 = Assertions.assertDoesNotThrow(() -> userService.register(u));
+
         // join game again
-        Assertions.assertThrows(AlreadyTakenException.class, () -> gameService.joinGamePlayer(auth.authToken(), g.gameID(), ChessGame.TeamColor.WHITE));
+        Assertions.assertThrows(AlreadyTakenException.class, () -> gameService.joinGamePlayer(a2.authToken(), g.gameID(), ChessGame.TeamColor.WHITE));
     }
 
 

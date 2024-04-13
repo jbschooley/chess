@@ -127,8 +127,11 @@ public class ServerFacadeTests {
         // join game
         Assertions.assertDoesNotThrow(() -> facade.joinGame(a.authToken(), g.gameID(), "BLACK"));
 
-        // join game again
-        Assertions.assertThrows(Exception.class, () -> facade.joinGame(a.authToken(), g.gameID(), "BLACK"));
+        // register another user
+        AuthData a2 = Assertions.assertDoesNotThrow(() -> facade.register("testuser2", password, email));
+
+        // join game again with new user
+        Assertions.assertThrows(Exception.class, () -> facade.joinGame(a2.authToken(), g.gameID(), "BLACK"));
     }
 
     @Test
