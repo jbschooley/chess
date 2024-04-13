@@ -3,11 +3,9 @@ package webSocketMessages.serverMessages;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.*;
 
 import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 /**
@@ -18,8 +16,6 @@ import java.util.Objects;
  */
 public class ServerMessage {
 
-    // exclude java.lang.ThreadLocal, TRACE_VTHREAD_LOCALS from serialization
-//    Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).create();
     Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     @Expose
