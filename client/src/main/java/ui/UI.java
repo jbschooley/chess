@@ -90,23 +90,28 @@ public class UI {
                 listGames();
                 break;
             case "join":
-                facade.joinGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])), args[2]);
-                System.out.println("Joined game " + args[1] + " as " + args[2] + " player");
-                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
-                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
+                int gameID = lastGames.get(Integer.parseInt(args[1]));
+                String colorString = args[2];
+                facade.joinGame(auth.authToken(), gameID, colorString);
+                System.out.println("Joined game " + args[1] + " as " + colorString + " player");
+                new GameplayUI(facade, gameID, colorString);
+//                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
+//                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
                 break;
             case "observe":
-                facade.observeGame(auth.authToken(), lastGames.get(Integer.parseInt(args[1])));
+                gameID = lastGames.get(Integer.parseInt(args[1]));
+                facade.observeGame(auth.authToken(), gameID);
                 System.out.println("Joined game " + args[1] + " as observer");
-                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
-                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
+                new GameplayUI(facade, gameID, null);
+//                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
+//                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
                 break;
             case "logout":
                 facade.logout(auth.authToken());
                 auth = null;
                 break;
             default:
-                System.out.println("Invalid command. Type Help for a list of commands.");
+                System.out.println("Invalid command. Type 'help' for a list of commands.");
                 break;
         }
     }
