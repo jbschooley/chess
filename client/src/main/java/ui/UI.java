@@ -1,10 +1,10 @@
 package ui;
 
-import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import serverAccess.ServerFacade;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Scanner;
@@ -34,7 +34,7 @@ public class UI {
                     uiPreLogin(args);
                 }
             } catch (Exception e) {
-                System.out.println("An error occurred: " + e.getMessage());
+                System.out.println("An error occurred: " + e.getMessage() + "\n" + Arrays.toString(e.getStackTrace()));
             }
         }
     }

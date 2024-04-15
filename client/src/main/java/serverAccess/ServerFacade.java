@@ -1,10 +1,10 @@
 package serverAccess;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
 import model.AuthData;
 import model.GameData;
 
+import javax.websocket.*;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -19,10 +19,12 @@ public class ServerFacade {
     String host = "localhost";
     int port;
     String baseURI;
+    String baseWSURI;
 
     public ServerFacade(int port) {
         this.port = port;
         this.baseURI = "http://%s:%d/".formatted(host, port);
+        this.baseWSURI = "ws://%s:%d/".formatted(host, port);
     }
 
     public void clear() throws Exception {
@@ -166,5 +168,11 @@ public class ServerFacade {
             InputStreamReader inputStreamReader = new InputStreamReader(respBody);
             String response = inputStreamReader.toString();
         }
+    }
+
+    public Session websocket(Endpoint ep) throws Exception {
+        URI uri = new URI(baseWSURI + "connect");
+        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+        return container.connectToServer(ep, uri);
     }
 }
