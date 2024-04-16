@@ -5,7 +5,7 @@ import com.google.gson.annotations.Expose;
 public class Error extends ServerMessage {
 
     @Expose
-    private final String errorMessage;
+    public final String errorMessage;
 
     public Error(String errorMessage) {
         super(ServerMessageType.ERROR);

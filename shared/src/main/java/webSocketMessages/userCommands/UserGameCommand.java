@@ -13,8 +13,6 @@ import java.util.Objects;
  * methods.
  */
 
-record UserGameCommandRaw(String authToken, String commandType) {}
-
 public class UserGameCommand {
 
     public UserGameCommand(String authToken) {
@@ -65,22 +63,14 @@ public class UserGameCommand {
 
     public static UserGameCommand fromJson(String message) {
         Gson gson = new Gson();
-        UserGameCommandRaw rc = gson.fromJson(message, UserGameCommandRaw.class);
+        UserGameCommand c = gson.fromJson(message, UserGameCommand.class);
 
-        Class<?> commandClass = null;
-
-        switch (rc.commandType()) {
-            case "JOIN_PLAYER" -> commandClass = JoinPlayer.class;
-            case "JOIN_OBSERVER" -> commandClass = JoinObserver.class;
-            case "MAKE_MOVE" -> commandClass = MakeMove.class;
-            case "LEAVE" -> commandClass = Leave.class;
-            case "RESIGN" -> commandClass = Resign.class;
-            default -> {
-                System.out.println("Unknown command type: " + rc.commandType());
-                return null;
-            }
-        }
-
-        return (UserGameCommand) gson.fromJson(message, commandClass);
+        return gson.fromJson(message, switch (c.getCommandType()) {
+            case JOIN_PLAYER -> JoinPlayer.class;
+            case JOIN_OBSERVER -> JoinObserver.class;
+            case MAKE_MOVE -> MakeMove.class;
+            case LEAVE -> Leave.class;
+            case RESIGN -> Resign.class;
+        });
     }
 }

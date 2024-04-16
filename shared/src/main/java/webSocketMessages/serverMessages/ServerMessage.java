@@ -12,9 +12,8 @@ import java.util.Objects;
  * Note: You can add to this class, but you should not alter the existing
  * methods.
  */
-public class ServerMessage {
 
-    Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
+public class ServerMessage {
 
     @Expose
     ServerMessageType serverMessageType;
@@ -34,6 +33,7 @@ public class ServerMessage {
     }
 
     public String toJson() {
+        Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
         return gson.toJson(this);
     }
 
@@ -50,5 +50,16 @@ public class ServerMessage {
     @Override
     public int hashCode() {
         return Objects.hash(getServerMessageType());
+    }
+
+    public static ServerMessage fromJson(String message) {
+        Gson gson = new Gson();
+        ServerMessage sm = gson.fromJson(message, ServerMessage.class);
+
+        return gson.fromJson(message, switch (sm.getServerMessageType()) {
+            case LOAD_GAME -> LoadGame.class;
+            case ERROR -> Error.class;
+            case NOTIFICATION -> Notification.class;
+        });
     }
 }

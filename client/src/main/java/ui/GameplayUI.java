@@ -3,6 +3,9 @@ package ui;
 import chess.ChessGame;
 import model.AuthData;
 import serverAccess.ServerFacade;
+import webSocketMessages.serverMessages.Error;
+import webSocketMessages.serverMessages.Notification;
+import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserver;
 import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.Leave;
@@ -20,6 +23,7 @@ public class GameplayUI extends Endpoint {
     ChessGame.TeamColor color;
     boolean isPlayer;
     Session ws;
+    boolean isPrompting = false;
 
     public GameplayUI(ServerFacade facade, AuthData a, int gameID, String colorString) throws Exception {
 
@@ -41,7 +45,9 @@ public class GameplayUI extends Endpoint {
         gameLoop: while (true) {
             System.out.printf("%s" + "game >>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
             Scanner scanner = new Scanner(System.in);
+            isPrompting = true;
             String line = scanner.nextLine();
+            isPrompting = false;
             String[] args = line.split(" ");
 
             try {
@@ -84,7 +90,9 @@ public class GameplayUI extends Endpoint {
 
     private void resign(Scanner scanner) {
         System.out.print("Are you sure you want to resign? Type 'yes' to confirm. >>> ");
+        isPrompting = true;
         String confirm = scanner.nextLine();
+        isPrompting = false;
         if (confirm.equals("yes"))
             send(new Resign(this.auth.authToken(), this.gameID).toJson());
     }
@@ -109,7 +117,29 @@ public class GameplayUI extends Endpoint {
     MessageHandler.Whole<String> messageHandler = new MessageHandler.Whole<String>() {
         @Override
         public void onMessage(String message) {
-            System.out.println("Received message: " + message);
+            System.out.println("Message received: " + message);
+            ServerMessage m = ServerMessage.fromJson(message);
+//            System.out.println("Message: " + m);
+
+            switch (m.getServerMessageType()) {
+                case LOAD_GAME -> {
+                    // TODO
+                }
+                case ERROR -> {
+                    Error e = (Error) m;
+                    System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.errorMessage + "\n");
+                    if (isPrompting) {
+                        System.out.printf("%s" + ">>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
+                    }
+                }
+                case NOTIFICATION -> {
+                    Notification n = (Notification) m;
+                    System.out.println("\nNotification: " + n.message + "\n");
+                    if (isPrompting) {
+                        System.out.printf("%s" + ">>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
+                    }
+                }
+            }
         }
     };
 }
