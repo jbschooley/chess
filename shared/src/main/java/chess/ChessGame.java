@@ -91,7 +91,6 @@ public class ChessGame {
         }
 
         // Return the valid moves
-        System.out.println(validMoves);
         return validMoves;
 
     }

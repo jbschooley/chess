@@ -1,8 +1,12 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
+
+import java.util.Collection;
+import java.util.HashSet;
 
 public class ChessBoard {
 
@@ -12,22 +16,34 @@ public class ChessBoard {
     }
 
     public static String drawBoard(ChessGame game, ChessGame.TeamColor bottomColor) {
-        String board = "";
-        board += letterRow(bottomColor) + "\n";
+        return drawBoard(game, bottomColor, null, null);
+    }
+
+    public static String drawBoard(ChessGame game, ChessGame.TeamColor bottomColor, ChessPosition currentPos, Collection<ChessMove> validMoves) {
+        Collection<ChessPosition> highlightPos = new HashSet<>();
+        if (validMoves != null) {
+            for (ChessMove move : validMoves) {
+                highlightPos.add(move.getEndPosition());
+            }
+        }
+
+        chess.ChessBoard board = game.getBoard();
+        String boardString = "";
+        boardString += letterRow(bottomColor) + "\n";
         switch (bottomColor) {
             case WHITE -> {
                 for (int row = 8; row >= 1; row--) {
-                    board += pieceRow(game, row, bottomColor) + "\n";
+                    boardString += pieceRow(game, row, bottomColor, currentPos, highlightPos) + "\n";
                 }
             }
             case BLACK -> {
                 for (int row = 1; row <= 8; row++) {
-                    board += pieceRow(game, row, bottomColor) + "\n";
+                    boardString += pieceRow(game, row, bottomColor, currentPos, highlightPos) + "\n";
                 }
             }
         }
-        board += letterRow(bottomColor);
-        return board;
+        boardString += letterRow(bottomColor);
+        return boardString;
     }
 
     static String letterRow(ChessGame.TeamColor bottomColor) {
@@ -43,7 +59,7 @@ public class ChessBoard {
         return "";
     }
 
-    static String pieceRow(ChessGame game, int row, ChessGame.TeamColor bottomColor) {
+    static String pieceRow(ChessGame game, int row, ChessGame.TeamColor bottomColor, ChessPosition currentPos, Collection<ChessPosition> highlightPos) {
         chess.ChessBoard board = game.getBoard();
         String rowString = "";
         rowString += " " + row + " |";
@@ -52,16 +68,14 @@ public class ChessBoard {
             case BLACK -> {
                 for (int col = 8; col >= 1; col--) {
                     ChessPosition position = new ChessPosition(row, col);
-                    ChessPiece piece = board.getPiece(position);
-                    rowString += unicodePiece(piece);
+                    rowString += pieceSquare(board, position, currentPos, highlightPos);
                     rowString += "|";
                 }
             }
             case WHITE -> {
                 for (int col = 1; col <= 8; col++) {
                     ChessPosition position = new ChessPosition(row, col);
-                    ChessPiece piece = board.getPiece(position);
-                    rowString += unicodePiece(piece);
+                    rowString += pieceSquare(board, position, currentPos, highlightPos);
                     rowString += "|";
                 }
             }
@@ -69,6 +83,19 @@ public class ChessBoard {
         rowString += " " + row + " ";
 
         return rowString;
+    }
+
+    static String pieceSquare(chess.ChessBoard board, ChessPosition position, ChessPosition currentPos, Collection<ChessPosition> highlightPos) {
+        ChessPiece piece = board.getPiece(position);
+        String pieceString = "";
+        if (position.equals(currentPos)) {
+            pieceString += EscapeSequences.SET_BG_COLOR_YELLOW;
+        } else if (highlightPos.contains(position)) {
+            pieceString += EscapeSequences.SET_BG_COLOR_GREEN;
+        }
+        pieceString += unicodePiece(piece);
+        pieceString += EscapeSequences.RESET_BG_COLOR;
+        return pieceString;
     }
 
     static String unicodePiece(ChessPiece piece) {

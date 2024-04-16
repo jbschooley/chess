@@ -11,6 +11,7 @@ import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.*;
 
+import java.util.Collection;
 import java.util.Scanner;
 import javax.websocket.*;
 
@@ -58,7 +59,7 @@ public class GameplayUI extends Endpoint {
                     case "help" -> {
                         System.out.println(
                                 helpLine("move <FROM> <TO>", "to move a piece") +
-                                        helpLine("highlight", "legal moves") +
+                                        helpLine("valid <FROM>", "highlight legal moves") +
                                         helpLine("redraw", "the board") +
                                         helpLine("resign", "playing chess") +
                                         helpLine("leave", "the game") +
@@ -74,10 +75,10 @@ public class GameplayUI extends Endpoint {
                         break gameLoop;
                     }
                     case "move" -> {
-                        move(scanner, args);
+                        move(args);
                     }
-                    case "highlight" -> {
-                        // TODO
+                    case "valid" -> {
+                        validMoves(args);
                     }
                     case "redraw" -> {
                         System.out.println("\n" + drawBoard(game, color));
@@ -92,7 +93,7 @@ public class GameplayUI extends Endpoint {
         }
     }
 
-    private void move(Scanner scanner, String[] args) {
+    private void move(String[] args) {
         if (args.length != 3) {
             System.out.println("Invalid move command. Type 'help' for a list of commands.");
             return;
@@ -101,14 +102,26 @@ public class GameplayUI extends Endpoint {
         String to = args[2];
 
         // parse from and to
-        // example: "move a2 a4"
-        // from ChessPosition(0, 1) to ChessPosition(0, 3)
 
         ChessPosition fromPos = new ChessPosition(from.charAt(1) - '0', from.charAt(0) - '`');
         ChessPosition toPos = new ChessPosition(to.charAt(1) - '0', to.charAt(0) - '`');
         ChessMove move = new ChessMove(fromPos, toPos, null);
 
         send(new MakeMove(this.auth.authToken(), this.gameID, move).toJson());
+    }
+
+    private void validMoves(String[] args) {
+        if (args.length != 2) {
+            System.out.println("Invalid move command. Type 'help' for a list of commands.");
+            return;
+        }
+        String from = args[1];
+
+        // parse from
+        ChessPosition fromPos = new ChessPosition(from.charAt(1) - '0', from.charAt(0) - '`');
+
+        Collection<ChessMove> moves = game.validMoves(fromPos);
+        System.out.println("\n" + drawBoard(game, color, fromPos, moves));
     }
 
     private void resign(Scanner scanner) {
