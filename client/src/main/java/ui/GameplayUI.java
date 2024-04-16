@@ -15,6 +15,8 @@ import webSocketMessages.userCommands.Resign;
 import java.util.Scanner;
 import javax.websocket.*;
 
+import static ui.ChessBoard.drawBoard;
+
 public class GameplayUI extends Endpoint {
 
     ServerFacade facade;
@@ -45,7 +47,7 @@ public class GameplayUI extends Endpoint {
         }
 
         gameLoop: while (true) {
-            System.out.printf("%s" + "game >>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
+            printPrompt();
             Scanner scanner = new Scanner(System.in);
             isPrompting = true;
             String line = scanner.nextLine();
@@ -54,35 +56,36 @@ public class GameplayUI extends Endpoint {
 
             try {
                 switch (args[0].toLowerCase()) {
-                    case "help":
+                    case "help" -> {
                         System.out.println(
                                 helpLine("move <FROM> <TO>", "to move a piece") +
-                                helpLine("highlight", "legal moves") +
-                                helpLine("redraw", "the board") +
-                                helpLine("resign", "playing chess") +
-                                helpLine("leave", "the game") +
-                                helpLine("help", "with possible commands")
+                                        helpLine("highlight", "legal moves") +
+                                        helpLine("redraw", "the board") +
+                                        helpLine("resign", "playing chess") +
+                                        helpLine("leave", "the game") +
+                                        helpLine("help", "with possible commands")
                         );
-                        break;
-                    case "resign":
+                    }
+                    case "resign" -> {
                         resign(scanner);
-                        break;
-                    case "leave":
+                    }
+                    case "leave" -> {
                         System.out.println("Leaving game...");
                         send(new Leave(this.auth.authToken(), this.gameID).toJson());
                         break gameLoop;
-                    case "move":
+                    }
+                    case "move" -> {
                         // TODO
-                        break;
-                    case "highlight":
+                    }
+                    case "highlight" -> {
                         // TODO
-                        break;
-                    case "redraw":
-                        // TODO
-                        break;
-                    default:
+                    }
+                    case "redraw" -> {
+                        System.out.println("\n" + drawBoard(game, color));
+                    }
+                    default -> {
                         System.out.println("Invalid command. Type 'help' for a list of commands.");
-                        break;
+                    }
                 }
             } catch (Exception e) {
                 System.out.println("An error occurred: " + e.getMessage());
@@ -111,6 +114,10 @@ public class GameplayUI extends Endpoint {
         }
     }
 
+    private void printPrompt() {
+        System.out.printf("%s" + ">>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
+    }
+
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
         System.out.println("Opening session");
@@ -125,20 +132,18 @@ public class GameplayUI extends Endpoint {
                 case LOAD_GAME -> {
                     LoadGame lg = (LoadGame) m;
                     game = lg.game;
+                    System.out.println("\n" + drawBoard(game, color));
+                    if (isPrompting) printPrompt();
                 }
                 case ERROR -> {
                     Error e = (Error) m;
                     System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + e.errorMessage + "\n");
-                    if (isPrompting) {
-                        System.out.printf("%s" + ">>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
-                    }
+                    if (isPrompting) printPrompt();
                 }
                 case NOTIFICATION -> {
                     Notification n = (Notification) m;
                     System.out.println("\nNotification: " + n.message + "\n");
-                    if (isPrompting) {
-                        System.out.printf("%s" + ">>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
-                    }
+                    if (isPrompting) printPrompt();
                 }
             }
         }
