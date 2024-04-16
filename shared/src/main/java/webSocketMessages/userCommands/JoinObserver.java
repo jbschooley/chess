@@ -1,8 +1,10 @@
 package webSocketMessages.userCommands;
 
-import chess.ChessGame;
+import com.google.gson.annotations.Expose;
 
 public class JoinObserver extends UserGameCommand {
+
+    @Expose
     public final int gameID;
 
     public JoinObserver(String authToken, int gameID) {

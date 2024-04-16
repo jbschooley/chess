@@ -1,8 +1,12 @@
 package ui;
 
+import chess.ChessGame;
 import model.AuthData;
 import serverAccess.ServerFacade;
+import webSocketMessages.userCommands.JoinObserver;
+import webSocketMessages.userCommands.JoinPlayer;
 import webSocketMessages.userCommands.Leave;
+import webSocketMessages.userCommands.Resign;
 
 import java.util.Scanner;
 import javax.websocket.*;
@@ -13,7 +17,7 @@ public class GameplayUI extends Endpoint {
     AuthData auth;
     int gameID;
     String gameName;
-    String colorString;
+    ChessGame.TeamColor color;
     boolean isPlayer;
     Session ws;
 
@@ -22,11 +26,17 @@ public class GameplayUI extends Endpoint {
         this.facade = facade;
         this.auth = a;
         this.gameID = gameID;
-        this.colorString = colorString;
+        this.color = colorString != null ? ChessGame.TeamColor.valueOf(colorString) : null;
         this.isPlayer = colorString != null;
 
         this.ws = facade.websocket(this);
         this.ws.addMessageHandler(messageHandler);
+
+        if (isPlayer) {
+            send(new JoinPlayer(this.auth.authToken(), this.gameID, color).toJson());
+        } else {
+            send(new JoinObserver(this.auth.authToken(), this.gameID).toJson());
+        }
 
         gameLoop: while (true) {
             System.out.printf("%s" + "game >>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
@@ -46,11 +56,20 @@ public class GameplayUI extends Endpoint {
                                 helpLine("help", "with possible commands")
                         );
                         break;
+                    case "resign":
+                        resign(scanner);
+                        break;
                     case "leave":
                         System.out.println("Leaving game...");
                         send(new Leave(this.auth.authToken(), this.gameID).toJson());
                         break gameLoop;
                     case "move":
+                        // TODO
+                        break;
+                    case "highlight":
+                        // TODO
+                        break;
+                    case "redraw":
                         // TODO
                         break;
                     default:
@@ -61,6 +80,13 @@ public class GameplayUI extends Endpoint {
                 System.out.println("An error occurred: " + e.getMessage());
             }
         }
+    }
+
+    private void resign(Scanner scanner) {
+        System.out.print("Are you sure you want to resign? Type 'yes' to confirm. >>> ");
+        String confirm = scanner.nextLine();
+        if (confirm.equals("yes"))
+            send(new Resign(this.auth.authToken(), this.gameID).toJson());
     }
 
     private static String helpLine(String command, String description) {
