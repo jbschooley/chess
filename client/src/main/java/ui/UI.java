@@ -94,7 +94,7 @@ public class UI {
                 String colorString = args[2];
                 facade.joinGame(auth.authToken(), gameID, colorString);
                 System.out.println("Joined game " + args[1] + " as " + colorString + " player");
-                new GameplayUI(facade, gameID, colorString);
+                new GameplayUI(facade, auth, gameID, colorString);
 //                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
 //                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
                 break;
@@ -102,7 +102,7 @@ public class UI {
                 gameID = lastGames.get(Integer.parseInt(args[1]));
                 facade.observeGame(auth.authToken(), gameID);
                 System.out.println("Joined game " + args[1] + " as observer");
-                new GameplayUI(facade, gameID, null);
+                new GameplayUI(facade, auth, gameID, null);
 //                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.BLACK));
 //                System.out.println(drawBoard(new ChessGame(), ChessGame.TeamColor.WHITE));
                 break;
