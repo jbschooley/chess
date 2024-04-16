@@ -4,6 +4,7 @@ import chess.ChessGame;
 import model.AuthData;
 import serverAccess.ServerFacade;
 import webSocketMessages.serverMessages.Error;
+import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
 import webSocketMessages.userCommands.JoinObserver;
@@ -24,6 +25,7 @@ public class GameplayUI extends Endpoint {
     boolean isPlayer;
     Session ws;
     boolean isPrompting = false;
+    ChessGame game;
 
     public GameplayUI(ServerFacade facade, AuthData a, int gameID, String colorString) throws Exception {
 
@@ -117,13 +119,12 @@ public class GameplayUI extends Endpoint {
     MessageHandler.Whole<String> messageHandler = new MessageHandler.Whole<String>() {
         @Override
         public void onMessage(String message) {
-            System.out.println("Message received: " + message);
             ServerMessage m = ServerMessage.fromJson(message);
-//            System.out.println("Message: " + m);
 
             switch (m.getServerMessageType()) {
                 case LOAD_GAME -> {
-                    // TODO
+                    LoadGame lg = (LoadGame) m;
+                    game = lg.game;
                 }
                 case ERROR -> {
                     Error e = (Error) m;
