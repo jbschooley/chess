@@ -93,10 +93,21 @@ public class WSServer {
         }
     }
 
+    @OnWebSocketError
+    public void onError(Session session, Throwable error) {
+        System.out.println("Error: " + error.getMessage());
+        error.printStackTrace();
+    }
+
     void send(Session session, ServerMessage message) throws IOException {
         System.out.println("Sending message");
 //        System.out.println("Converting to JSON: " + message.toJson());
-        session.getRemote().sendString(message.toJson());
+        try {
+            session.getRemote().sendString(message.toJson());
+        } catch (Exception e) {
+            System.out.println("Error sending message: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     void sendLoadGame(Session session, String authToken, int gameID) throws IOException {

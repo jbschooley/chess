@@ -1,5 +1,7 @@
 package chess;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.Objects;
 
 /**
@@ -10,8 +12,13 @@ import java.util.Objects;
  */
 public class ChessMove {
 
+    @Expose
     private final ChessPosition startPosition;
+
+    @Expose
     private final ChessPosition endPosition;
+
+    @Expose
     private ChessPiece.PieceType promotionPiece;
 
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,

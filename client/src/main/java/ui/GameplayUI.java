@@ -1,16 +1,15 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import model.AuthData;
 import serverAccess.ServerFacade;
 import webSocketMessages.serverMessages.Error;
 import webSocketMessages.serverMessages.LoadGame;
 import webSocketMessages.serverMessages.Notification;
 import webSocketMessages.serverMessages.ServerMessage;
-import webSocketMessages.userCommands.JoinObserver;
-import webSocketMessages.userCommands.JoinPlayer;
-import webSocketMessages.userCommands.Leave;
-import webSocketMessages.userCommands.Resign;
+import webSocketMessages.userCommands.*;
 
 import java.util.Scanner;
 import javax.websocket.*;
@@ -75,7 +74,7 @@ public class GameplayUI extends Endpoint {
                         break gameLoop;
                     }
                     case "move" -> {
-                        // TODO
+                        move(scanner, args);
                     }
                     case "highlight" -> {
                         // TODO
@@ -91,6 +90,25 @@ public class GameplayUI extends Endpoint {
                 System.out.println("An error occurred: " + e.getMessage());
             }
         }
+    }
+
+    private void move(Scanner scanner, String[] args) {
+        if (args.length != 3) {
+            System.out.println("Invalid move command. Type 'help' for a list of commands.");
+            return;
+        }
+        String from = args[1];
+        String to = args[2];
+
+        // parse from and to
+        // example: "move a2 a4"
+        // from ChessPosition(0, 1) to ChessPosition(0, 3)
+
+        ChessPosition fromPos = new ChessPosition(from.charAt(1) - '0', from.charAt(0) - '`');
+        ChessPosition toPos = new ChessPosition(to.charAt(1) - '0', to.charAt(0) - '`');
+        ChessMove move = new ChessMove(fromPos, toPos, null);
+
+        send(new MakeMove(this.auth.authToken(), this.gameID, move).toJson());
     }
 
     private void resign(Scanner scanner) {

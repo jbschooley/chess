@@ -1,5 +1,7 @@
 package chess;
 
+import com.google.gson.annotations.Expose;
+
 import java.util.Objects;
 
 /**
@@ -10,7 +12,10 @@ import java.util.Objects;
  */
 public class ChessPosition {
 
+    @Expose
     private final int row;
+
+    @Expose
     private final int col;
 
     public ChessPosition(int row, int col) {
