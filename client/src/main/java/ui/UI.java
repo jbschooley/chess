@@ -18,11 +18,11 @@ public class UI {
 
     public UI(ServerFacade facade) {
         this.facade = facade;
-        System.out.println(EscapeSequences.SET_TEXT_COLOR_WHITE + "♕ Welcome to 240 Chess. Type Help to get started. ♕\n");
+        System.out.println(EscapeSequences.RESET + "♕ Welcome to 240 Chess. Type Help to get started. ♕\n");
 
         while (true) {
             boolean loggedIn = auth != null;
-            System.out.printf("%s[%s] >>> ", EscapeSequences.SET_TEXT_COLOR_WHITE, auth == null ? "LOGGED_OUT" : "LOGGED_IN");
+            System.out.printf("%s[%s] >>> ", EscapeSequences.RESET, auth == null ? "LOGGED_OUT" : "LOGGED_IN");
             Scanner scanner = new Scanner(System.in);
             String line = scanner.nextLine();
             String[] args = line.split(" ");

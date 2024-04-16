@@ -34,7 +34,7 @@ public class GameplayUI extends Endpoint {
         this.facade = facade;
         this.auth = a;
         this.gameID = gameID;
-        this.color = colorString != null ? ChessGame.TeamColor.valueOf(colorString) : null;
+        this.color = colorString != null ? ChessGame.TeamColor.valueOf(colorString) : ChessGame.TeamColor.WHITE;
         this.isPlayer = colorString != null;
 
         this.ws = facade.websocket(this);
@@ -59,11 +59,11 @@ public class GameplayUI extends Endpoint {
                     case "help" -> {
                         System.out.println(
                                 helpLine("move <FROM> <TO>", "to move a piece") +
-                                        helpLine("valid <FROM>", "highlight legal moves") +
-                                        helpLine("redraw", "the board") +
-                                        helpLine("resign", "playing chess") +
-                                        helpLine("leave", "the game") +
-                                        helpLine("help", "with possible commands")
+                                helpLine("valid <FROM>", "highlight legal moves") +
+                                helpLine("redraw", "the board") +
+                                helpLine("resign", "playing chess") +
+                                helpLine("leave", "the game") +
+                                helpLine("help", "with possible commands")
                         );
                     }
                     case "resign" -> {
@@ -146,7 +146,7 @@ public class GameplayUI extends Endpoint {
     }
 
     private void printPrompt() {
-        System.out.printf("%s" + ">>> ", EscapeSequences.SET_TEXT_COLOR_WHITE);
+        System.out.printf("%s" + ">>> ", EscapeSequences.RESET);
     }
 
     @Override

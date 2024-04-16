@@ -94,7 +94,7 @@ public class ChessBoard {
             pieceString += EscapeSequences.SET_BG_COLOR_GREEN;
         }
         pieceString += unicodePiece(piece);
-        pieceString += EscapeSequences.RESET_BG_COLOR;
+        pieceString += EscapeSequences.RESET;
         return pieceString;
     }
 
