@@ -8,6 +8,7 @@ import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import org.eclipse.jetty.websocket.api.*;
+import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
 import service.ClearService;
 import service.GameService;
 import service.UserService;
@@ -51,6 +52,11 @@ public class WSServer {
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+
+        // set idle timeout
+        WebSocketServerFactory factory = new WebSocketServerFactory();
+        factory.setCreator((req, resp) -> new WSServer());
+        factory.getPolicy().setIdleTimeout(1000 * 60 * 60);
     }
 
     @OnWebSocketMessage

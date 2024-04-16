@@ -57,6 +57,7 @@ public class ChessPosition {
     }
 
     public String toString() {
-    	return "(" + row + "," + col + ")";
+        // return "(" + row + "," + col + ")";
+    	return (char)('a' + col - 1) + "" + row;
     }
 }
